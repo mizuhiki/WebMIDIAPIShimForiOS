@@ -1,0 +1,513 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C191EE3A1917B6DC0014167A /* MIDIDriver.m in Sources */ = {isa = PBXBuildFile; fileRef = C191EE391917B6DB0014167A /* MIDIDriver.m */; };
+		C191EE3D1917B85E0014167A /* MIDIParser.m in Sources */ = {isa = PBXBuildFile; fileRef = C191EE3C1917B85E0014167A /* MIDIParser.m */; };
+		C19656E2190E771C0085E3FE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19656E1190E771C0085E3FE /* Foundation.framework */; };
+		C19656E4190E771C0085E3FE /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19656E3190E771C0085E3FE /* CoreGraphics.framework */; };
+		C19656E6190E771C0085E3FE /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19656E5190E771C0085E3FE /* UIKit.framework */; };
+		C19656EC190E771C0085E3FE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C19656EA190E771C0085E3FE /* InfoPlist.strings */; };
+		C19656EE190E771C0085E3FE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C19656ED190E771C0085E3FE /* main.m */; };
+		C19656F2190E771C0085E3FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C19656F1190E771C0085E3FE /* AppDelegate.m */; };
+		C19656F5190E771C0085E3FE /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C19656F3190E771C0085E3FE /* Main_iPhone.storyboard */; };
+		C19656F8190E771C0085E3FE /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C19656F6190E771C0085E3FE /* Main_iPad.storyboard */; };
+		C19656FB190E771C0085E3FE /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C19656FA190E771C0085E3FE /* ViewController.m */; };
+		C19656FD190E771C0085E3FE /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C19656FC190E771C0085E3FE /* Images.xcassets */; };
+		C1965704190E771C0085E3FE /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1965703190E771C0085E3FE /* XCTest.framework */; };
+		C1965705190E771C0085E3FE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19656E1190E771C0085E3FE /* Foundation.framework */; };
+		C1965706190E771C0085E3FE /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19656E5190E771C0085E3FE /* UIKit.framework */; };
+		C196570E190E771C0085E3FE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C196570C190E771C0085E3FE /* InfoPlist.strings */; };
+		C1965710190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C196570F190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m */; };
+		C196571A190E78090085E3FE /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = C1965719190E78090085E3FE /* index.html */; };
+		C196571E190E82F80085E3FE /* WebMIDIAPIPolyfill.js in Resources */ = {isa = PBXBuildFile; fileRef = C196571D190E82F80085E3FE /* WebMIDIAPIPolyfill.js */; };
+		C1965721190FB74D0085E3FE /* WebViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C1965720190FB74D0085E3FE /* WebViewDelegate.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C1965707190E771C0085E3FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C19656D6190E771C0085E3FE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C19656DD190E771C0085E3FE;
+			remoteInfo = WebMIDIAPIPolyfill;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		C191EE381917B6DB0014167A /* MIDIDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MIDIDriver.h; sourceTree = "<group>"; };
+		C191EE391917B6DB0014167A /* MIDIDriver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MIDIDriver.m; sourceTree = "<group>"; };
+		C191EE3B1917B85E0014167A /* MIDIParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MIDIParser.h; sourceTree = "<group>"; };
+		C191EE3C1917B85E0014167A /* MIDIParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MIDIParser.m; sourceTree = "<group>"; };
+		C19656DE190E771C0085E3FE /* WebMIDIAPIShimForiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebMIDIAPIShimForiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C19656E1190E771C0085E3FE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		C19656E3190E771C0085E3FE /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		C19656E5190E771C0085E3FE /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		C19656E9190E771C0085E3FE /* WebMIDIAPIShimForiOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WebMIDIAPIShimForiOS-Info.plist"; sourceTree = "<group>"; };
+		C19656EB190E771C0085E3FE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C19656ED190E771C0085E3FE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		C19656EF190E771C0085E3FE /* WebMIDIAPIShimForiOS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WebMIDIAPIShimForiOS-Prefix.pch"; sourceTree = "<group>"; };
+		C19656F0190E771C0085E3FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		C19656F1190E771C0085E3FE /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		C19656F4190E771C0085E3FE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
+		C19656F7190E771C0085E3FE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
+		C19656F9190E771C0085E3FE /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		C19656FA190E771C0085E3FE /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		C19656FC190E771C0085E3FE /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		C1965702190E771C0085E3FE /* WebMIDIAPIShimForiOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebMIDIAPIShimForiOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1965703190E771C0085E3FE /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		C196570B190E771C0085E3FE /* WebMIDIAPIShimForiOSTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WebMIDIAPIShimForiOSTests-Info.plist"; sourceTree = "<group>"; };
+		C196570D190E771C0085E3FE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C196570F190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WebMIDIAPIPolyfillTests.m; sourceTree = "<group>"; };
+		C1965719190E78090085E3FE /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
+		C196571D190E82F80085E3FE /* WebMIDIAPIPolyfill.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = WebMIDIAPIPolyfill.js; sourceTree = "<group>"; };
+		C196571F190FB74D0085E3FE /* WebViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewDelegate.h; sourceTree = "<group>"; };
+		C1965720190FB74D0085E3FE /* WebViewDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebViewDelegate.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C19656DB190E771C0085E3FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C19656E4190E771C0085E3FE /* CoreGraphics.framework in Frameworks */,
+				C19656E6190E771C0085E3FE /* UIKit.framework in Frameworks */,
+				C19656E2190E771C0085E3FE /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C19656FF190E771C0085E3FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1965704190E771C0085E3FE /* XCTest.framework in Frameworks */,
+				C1965706190E771C0085E3FE /* UIKit.framework in Frameworks */,
+				C1965705190E771C0085E3FE /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C19656D5190E771C0085E3FE = {
+			isa = PBXGroup;
+			children = (
+				C19656E7190E771C0085E3FE /* WebMIDIAPIPolyfill */,
+				C1965709190E771C0085E3FE /* WebMIDIAPIPolyfillTests */,
+				C19656E0190E771C0085E3FE /* Frameworks */,
+				C19656DF190E771C0085E3FE /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C19656DF190E771C0085E3FE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C19656DE190E771C0085E3FE /* WebMIDIAPIShimForiOS.app */,
+				C1965702190E771C0085E3FE /* WebMIDIAPIShimForiOSTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C19656E0190E771C0085E3FE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C19656E1190E771C0085E3FE /* Foundation.framework */,
+				C19656E3190E771C0085E3FE /* CoreGraphics.framework */,
+				C19656E5190E771C0085E3FE /* UIKit.framework */,
+				C1965703190E771C0085E3FE /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C19656E7190E771C0085E3FE /* WebMIDIAPIPolyfill */ = {
+			isa = PBXGroup;
+			children = (
+				C19656F0190E771C0085E3FE /* AppDelegate.h */,
+				C19656F1190E771C0085E3FE /* AppDelegate.m */,
+				C19656F3190E771C0085E3FE /* Main_iPhone.storyboard */,
+				C19656F6190E771C0085E3FE /* Main_iPad.storyboard */,
+				C19656F9190E771C0085E3FE /* ViewController.h */,
+				C19656FA190E771C0085E3FE /* ViewController.m */,
+				C196571F190FB74D0085E3FE /* WebViewDelegate.h */,
+				C1965720190FB74D0085E3FE /* WebViewDelegate.m */,
+				C191EE3B1917B85E0014167A /* MIDIParser.h */,
+				C191EE3C1917B85E0014167A /* MIDIParser.m */,
+				C191EE381917B6DB0014167A /* MIDIDriver.h */,
+				C191EE391917B6DB0014167A /* MIDIDriver.m */,
+				C1965719190E78090085E3FE /* index.html */,
+				C196571D190E82F80085E3FE /* WebMIDIAPIPolyfill.js */,
+				C19656FC190E771C0085E3FE /* Images.xcassets */,
+				C19656E8190E771C0085E3FE /* Supporting Files */,
+			);
+			path = WebMIDIAPIPolyfill;
+			sourceTree = "<group>";
+		};
+		C19656E8190E771C0085E3FE /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				C19656E9190E771C0085E3FE /* WebMIDIAPIShimForiOS-Info.plist */,
+				C19656EA190E771C0085E3FE /* InfoPlist.strings */,
+				C19656ED190E771C0085E3FE /* main.m */,
+				C19656EF190E771C0085E3FE /* WebMIDIAPIShimForiOS-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		C1965709190E771C0085E3FE /* WebMIDIAPIPolyfillTests */ = {
+			isa = PBXGroup;
+			children = (
+				C196570F190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m */,
+				C196570A190E771C0085E3FE /* Supporting Files */,
+			);
+			path = WebMIDIAPIPolyfillTests;
+			sourceTree = "<group>";
+		};
+		C196570A190E771C0085E3FE /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				C196570B190E771C0085E3FE /* WebMIDIAPIShimForiOSTests-Info.plist */,
+				C196570C190E771C0085E3FE /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C19656DD190E771C0085E3FE /* WebMIDIAPIShimForiOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1965713190E771C0085E3FE /* Build configuration list for PBXNativeTarget "WebMIDIAPIShimForiOS" */;
+			buildPhases = (
+				C19656DA190E771C0085E3FE /* Sources */,
+				C19656DB190E771C0085E3FE /* Frameworks */,
+				C19656DC190E771C0085E3FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WebMIDIAPIShimForiOS;
+			productName = WebMIDIAPIPolyfill;
+			productReference = C19656DE190E771C0085E3FE /* WebMIDIAPIShimForiOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C1965701190E771C0085E3FE /* WebMIDIAPIShimForiOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1965716190E771C0085E3FE /* Build configuration list for PBXNativeTarget "WebMIDIAPIShimForiOSTests" */;
+			buildPhases = (
+				C19656FE190E771C0085E3FE /* Sources */,
+				C19656FF190E771C0085E3FE /* Frameworks */,
+				C1965700190E771C0085E3FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C1965708190E771C0085E3FE /* PBXTargetDependency */,
+			);
+			name = WebMIDIAPIShimForiOSTests;
+			productName = WebMIDIAPIPolyfillTests;
+			productReference = C1965702190E771C0085E3FE /* WebMIDIAPIShimForiOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C19656D6190E771C0085E3FE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = "Takashi Mizuhiki";
+				TargetAttributes = {
+					C1965701190E771C0085E3FE = {
+						TestTargetID = C19656DD190E771C0085E3FE;
+					};
+				};
+			};
+			buildConfigurationList = C19656D9190E771C0085E3FE /* Build configuration list for PBXProject "WebMIDIAPIShimForiOS" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C19656D5190E771C0085E3FE;
+			productRefGroup = C19656DF190E771C0085E3FE /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C19656DD190E771C0085E3FE /* WebMIDIAPIShimForiOS */,
+				C1965701190E771C0085E3FE /* WebMIDIAPIShimForiOSTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C19656DC190E771C0085E3FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C196571A190E78090085E3FE /* index.html in Resources */,
+				C19656F8190E771C0085E3FE /* Main_iPad.storyboard in Resources */,
+				C19656FD190E771C0085E3FE /* Images.xcassets in Resources */,
+				C19656F5190E771C0085E3FE /* Main_iPhone.storyboard in Resources */,
+				C19656EC190E771C0085E3FE /* InfoPlist.strings in Resources */,
+				C196571E190E82F80085E3FE /* WebMIDIAPIPolyfill.js in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1965700190E771C0085E3FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C196570E190E771C0085E3FE /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C19656DA190E771C0085E3FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C191EE3A1917B6DC0014167A /* MIDIDriver.m in Sources */,
+				C1965721190FB74D0085E3FE /* WebViewDelegate.m in Sources */,
+				C19656FB190E771C0085E3FE /* ViewController.m in Sources */,
+				C19656F2190E771C0085E3FE /* AppDelegate.m in Sources */,
+				C19656EE190E771C0085E3FE /* main.m in Sources */,
+				C191EE3D1917B85E0014167A /* MIDIParser.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C19656FE190E771C0085E3FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1965710190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C1965708190E771C0085E3FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C19656DD190E771C0085E3FE /* WebMIDIAPIShimForiOS */;
+			targetProxy = C1965707190E771C0085E3FE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		C19656EA190E771C0085E3FE /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C19656EB190E771C0085E3FE /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		C19656F3190E771C0085E3FE /* Main_iPhone.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C19656F4190E771C0085E3FE /* Base */,
+			);
+			name = Main_iPhone.storyboard;
+			sourceTree = "<group>";
+		};
+		C19656F6190E771C0085E3FE /* Main_iPad.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C19656F7190E771C0085E3FE /* Base */,
+			);
+			name = Main_iPad.storyboard;
+			sourceTree = "<group>";
+		};
+		C196570C190E771C0085E3FE /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C196570D190E771C0085E3FE /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C1965711190E771C0085E3FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C1965712190E771C0085E3FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C1965714190E771C0085E3FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WebMIDIAPIPolyfill/WebMIDIAPIShimForiOS-Prefix.pch";
+				INFOPLIST_FILE = "WebMIDIAPIPolyfill/WebMIDIAPIShimForiOS-Info.plist";
+				PRODUCT_NAME = WebMIDIAPIShimForiOS;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		C1965715190E771C0085E3FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WebMIDIAPIPolyfill/WebMIDIAPIShimForiOS-Prefix.pch";
+				INFOPLIST_FILE = "WebMIDIAPIPolyfill/WebMIDIAPIShimForiOS-Info.plist";
+				PRODUCT_NAME = WebMIDIAPIShimForiOS;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		C1965717190E771C0085E3FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/WebMIDIAPIPolyfill.app/WebMIDIAPIPolyfill";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WebMIDIAPIPolyfill/WebMIDIAPIPolyfill-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "WebMIDIAPIPolyfillTests/WebMIDIAPIShimForiOSTests-Info.plist";
+				PRODUCT_NAME = WebMIDIAPIShimForiOSTests;
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		C1965718190E771C0085E3FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/WebMIDIAPIPolyfill.app/WebMIDIAPIPolyfill";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WebMIDIAPIPolyfill/WebMIDIAPIPolyfill-Prefix.pch";
+				INFOPLIST_FILE = "WebMIDIAPIPolyfillTests/WebMIDIAPIShimForiOSTests-Info.plist";
+				PRODUCT_NAME = WebMIDIAPIShimForiOSTests;
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C19656D9190E771C0085E3FE /* Build configuration list for PBXProject "WebMIDIAPIShimForiOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1965711190E771C0085E3FE /* Debug */,
+				C1965712190E771C0085E3FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C1965713190E771C0085E3FE /* Build configuration list for PBXNativeTarget "WebMIDIAPIShimForiOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1965714190E771C0085E3FE /* Debug */,
+				C1965715190E771C0085E3FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C1965716190E771C0085E3FE /* Build configuration list for PBXNativeTarget "WebMIDIAPIShimForiOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1965717190E771C0085E3FE /* Debug */,
+				C1965718190E771C0085E3FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C19656D6190E771C0085E3FE /* Project object */;
+}

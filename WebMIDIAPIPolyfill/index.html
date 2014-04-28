@@ -1,0 +1,86 @@
+<html>
+<head>
+<script type="text/javascript">
+    var midiAccess = null;
+
+    function setup() {
+        if (window.navigator.requestMIDIAccess) {
+            window.navigator.requestMIDIAccess().then( success, function() { alert("requestMIDIAccess() failed.") });
+        } else {
+            alert("Web MIDI API is not available.");
+        }
+
+        function success(access) {
+            midiAccess = access;
+
+            var inputs = midiAccess.inputs();
+            for (var port = 0; port < inputs.length; port++) {
+                (function () {
+                    var _port = port;
+                    inputs[_port].onmidimessage = function (event) {
+                        var str = _port + " [" + event.data.length + " bytes]: ";
+                        for (var i = 0; i < event.data.length; i++) {
+                            str += "0x" + event.data[i].toString(16) + " ";
+                        }
+                    
+                        var messagelog = document.getElementById('messagelog');
+                        messagelog.innerHTML += str + "\n";
+                        messagelog.scrollTop = messagelog.scrollHeight;
+                    }
+                }());
+            }
+        }
+    }
+
+    function _midiMessageListener() {
+        document.getElementById('messagelog').innerHTML += "event received" + "\n";
+    }
+
+    function enableEventListener() {
+        var inputs = midiAccess.inputs();
+        for (var port = 0; port < inputs.length; port++) {
+            inputs[port].addEventListener("midimessage", _midiMessageListener, false);
+        }
+    }
+
+    function disableEventListener() {
+        var inputs = midiAccess.inputs();
+        for (var port = 0; port < inputs.length; port++) {
+            inputs[port].removeEventListener("midimessage", _midiMessageListener, false);
+        }
+    }
+
+    function noteOn() {
+        var outputs = midiAccess.outputs();
+        for (var i = 0; i < outputs.length; i++) {
+            var output = outputs[i];
+            output.send( [0x90, 60, 0x40] , window.performance.now() );
+        }
+    }
+
+    function noteOff() {
+        var outputs = midiAccess.outputs();
+        for (var i = 0; i < outputs.length; i++) {
+            var output = outputs[i];
+            output.send( [0x80, 60, 0x40] , window.performance.now() );
+        }
+    }
+
+    window.onload = function() {
+        setup();
+    }
+
+</script>
+</head>
+<body>
+<br>
+<br>
+<a href="javascript:setup();">setup</a>
+<a href="javascript:noteOn();">noteOn</a>
+<a href="javascript:noteOff();">noteOff</a>
+<a href="javascript:enableEventListener();">enableEventListener</a>
+<a href="javascript:disableEventListener();">disableEventListener</a>
+<a href="javascript:document.getElementById('messagelog').innerHTML = '';">clear</a>
+<pre id="messagelog" style="width:100%; height:80%; overflow:auto; border:1px solid #aaaaaa;"></pre>
+</body>
+</html>
