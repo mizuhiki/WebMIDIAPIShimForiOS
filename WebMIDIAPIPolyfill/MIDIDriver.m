@@ -31,7 +31,7 @@
 {
     MIDIEndpointRef endpoint = MIDIGetDestination(index);
 
-    Byte buffer[1024];
+    Byte buffer[sizeof(MIDIPacketList) + [data length]];
     MIDIPacketList *packetList = (MIDIPacketList *)buffer;
     MIDIPacket *packet = MIDIPacketListInit(packetList);
     packet = MIDIPacketListAdd(packetList, sizeof(buffer), packet, 0, [data length], [data bytes]);

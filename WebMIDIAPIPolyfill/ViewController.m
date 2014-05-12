@@ -58,7 +58,6 @@
     [textField setKeyboardType:UIKeyboardTypeURL];
     [textField setReturnKeyType:UIReturnKeyGo];
     [textField setClearButtonMode:UITextFieldViewModeWhileEditing];
-    textField.text = @"http://taktech.org/takm/test/";
     self.navigationItem.titleView = textField;
 
     _delegate = [[WebViewDelegate alloc] init];

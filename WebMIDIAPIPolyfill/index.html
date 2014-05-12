@@ -73,14 +73,12 @@
 </script>
 </head>
 <body>
-<br>
-<br>
-<a href="javascript:setup();">setup</a>
-<a href="javascript:noteOn();">noteOn</a>
-<a href="javascript:noteOff();">noteOff</a>
-<a href="javascript:enableEventListener();">enableEventListener</a>
-<a href="javascript:disableEventListener();">disableEventListener</a>
-<a href="javascript:document.getElementById('messagelog').innerHTML = '';">clear</a>
+<h1>Web MIDI API test</h1>
+<a href="javascript:noteOn();">[note on]</a>
+<a href="javascript:noteOff();">[note off]</a>
+<a href="javascript:document.getElementById('messagelog').innerHTML = '';">[clear log]</a>
+
+<h2>MIDI input log</h2>
 <pre id="messagelog" style="width:100%; height:80%; overflow:auto; border:1px solid #aaaaaa;"></pre>
 </body>
 </html>
