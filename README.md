@@ -1,6 +1,6 @@
 WebMIDIAPIShimForiOS
 ====================
-This is a shim to enable [Web MIDI API](https://dvcs.w3.org/hg/audio/raw-file/tip/midi/specification.html) on iOS. [WebMIDIAPIPolyfill.js](WebMIDIAPIPolyfill/WebMIDIAPIPolyfill.js) is the bridge script to invoke iOS native Core MIDI APIs. And [WebViewDelegate.m](WebMIDIAPIPolyfill/WebViewDelegate.m) is the receptor for informal URL schemes triggered by the bridge script. You can build a hybrid Web MIDI application with using them.
+This is a shim to enable [Web MIDI API](http://www.w3.org/TR/webmidi/) on iOS. [WebMIDIAPIPolyfill.js](WebMIDIAPIPolyfill/WebMIDIAPIPolyfill.js) is the bridge script to invoke iOS native Core MIDI APIs. And [WebViewDelegate.m](WebMIDIAPIPolyfill/WebViewDelegate.m) is the receptor for informal URL schemes triggered by the bridge script. You can build a hybrid Web MIDI application with using them.
 
 ![sample screen](images/sample_screen.png)
 
