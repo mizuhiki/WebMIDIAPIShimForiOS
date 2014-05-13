@@ -171,9 +171,6 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
 {
     self = [super init];
     if (self) {
-        [[MIDINetworkSession defaultSession] setEnabled:YES];
-        [[MIDINetworkSession defaultSession] setConnectionPolicy:MIDINetworkConnectionPolicy_Anyone];
-
         [self createMIDIClient];
     }
     

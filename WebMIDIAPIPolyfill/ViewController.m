@@ -27,29 +27,51 @@
 
 @implementation ViewController
 
-- (void)onEditingDidEnd:(UITextField *)field
+
+- (void)loadURL:(NSURL *)url
 {
+    // Create an instance of UIWebView
+    // To enable Web MIDI API shim, a JavaScript injection hack is used.
+    // But the hack is only effective at the first page loading.
+    // So, have to create an instance every page.
     UIWebView *webview = [[UIWebView alloc] initWithFrame:_webview.frame];
     webview.autoresizingMask = _webview.autoresizingMask;
     
+    // Replace UIWebViews
     [self.view insertSubview:webview aboveSubview:_webview];
     [_webview removeFromSuperview];
 
+    // Inherit the delgate.
     _webview = webview;
     _webview.delegate = _delegate;
 
+    // Inject Web MIDI API bridge JavaScript
     NSString *polyfill_path = [[NSBundle mainBundle] pathForResource:@"WebMIDIAPIPolyfill" ofType:@"js"];
     NSString *polyfill_script = [NSString stringWithContentsOfFile:polyfill_path encoding:NSUTF8StringEncoding error:nil];
     [_webview stringByEvaluatingJavaScriptFromString:polyfill_script];
-
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:field.text]];
+    
+    // Load URL
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [_webview loadRequest:request];
 }
+
+#pragma mark -
+#pragma mark View action handlers
+
+- (void)onEditingDidEnd:(UITextField *)field
+{
+    [self loadURL:[NSURL URLWithString:field.text]];
+}
+
+
+#pragma mark -
+#pragma mark View initializers
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 
+    // Create a URL input field on the navigation bar
     UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 30)];
     [textField setBorderStyle:UITextBorderStyleRoundedRect];
     [textField setPlaceholder:@"Enter URL"];
@@ -60,26 +82,20 @@
     [textField setClearButtonMode:UITextFieldViewModeWhileEditing];
     self.navigationItem.titleView = textField;
 
+     // Create a delegate for handling informal URL schemes.
     _delegate = [[WebViewDelegate alloc] init];
+    _delegate.midiDriver = [[MIDIDriver alloc] init];
+
     _webview.delegate = _delegate;
 
-    MIDIDriver *midiDriver = [[MIDIDriver alloc] init];
-    _delegate.midiDriver = midiDriver;
-
+    // Open sample HTML file at bundle path
     NSString *path = [[NSBundle mainBundle] pathForResource:@"index" ofType:@"html"];
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL fileURLWithPath:path]];
-
-    NSString *polyfill_path = [[NSBundle mainBundle] pathForResource:@"WebMIDIAPIPolyfill" ofType:@"js"];
-    NSString *polyfill_script = [NSString stringWithContentsOfFile:polyfill_path encoding:NSUTF8StringEncoding error:nil];
-    [_webview stringByEvaluatingJavaScriptFromString:polyfill_script];
-    
-    [_webview loadRequest:request];
+    [self loadURL:[NSURL fileURLWithPath:path]];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 @end
