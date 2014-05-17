@@ -108,7 +108,7 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
             [message appendBytes:&byte length:1];
         }
 
-        ItemCount outputIndex = [dict[@"outputIndex"] unsignedLongValue];
+        ItemCount outputIndex = [dict[@"outputPortIndex"] unsignedLongValue];
         [_midiDriver sendMessage:message toDestinationIndex:outputIndex];
 
         return NO;
