@@ -109,7 +109,8 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
         }
 
         ItemCount outputIndex = [dict[@"outputPortIndex"] unsignedLongValue];
-        [_midiDriver sendMessage:message toDestinationIndex:outputIndex];
+        float deltatime = [dict[@"deltaTime"] floatValue];
+        [_midiDriver sendMessage:message toDestinationIndex:outputIndex deltatime:deltatime];
 
         return NO;
     }

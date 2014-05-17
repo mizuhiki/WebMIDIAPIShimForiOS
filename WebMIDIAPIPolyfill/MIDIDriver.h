@@ -25,7 +25,7 @@
     MIDIPortRef outputPortRef;
 }
 
-- (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index;
+- (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
 
 @property (nonatomic, copy) void (^onReceiveMessage)(ItemCount index, NSData *data);
 

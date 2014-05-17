@@ -168,13 +168,13 @@
         }
 
         if (timestamp) {
-            delayBeforeSend = Math.floor( timestamp - window.performance.now() );
+            delayBeforeSend = timestamp - window.performance.now();
         }
 
-        MIDIOutputData = function ( outputPortIndex, data, timestamp ) {
+        MIDIOutputData = function ( outputPortIndex, data, deltaTime ) {
             this.outputPortIndex = outputPortIndex;
             this.data = data;
-            this.timestamp = timestamp;
+            this.deltaTime = deltaTime;
         };
 
         var outputData = new MIDIOutputData(this._index, data, delayBeforeSend);

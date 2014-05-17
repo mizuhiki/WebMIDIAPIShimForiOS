@@ -16,25 +16,29 @@
  
  */
 
+#import <mach/mach_time.h>
+
 #import "MIDIDriver.h"
 #import "MIDIParser.h"
 
 @interface MIDIDriver () {
     NSArray *_parsers;
+    mach_timebase_info_data_t _base;
 }
 
 @end
 
 @implementation MIDIDriver
 
-- (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index
+- (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms
 {
     MIDIEndpointRef endpoint = MIDIGetDestination(index);
+    MIDITimeStamp timestamp = mach_absolute_time() + deltatime_ms * 1000000 /* ns */ * _base.denom / _base.numer;
 
     Byte buffer[sizeof(MIDIPacketList) + [data length]];
     MIDIPacketList *packetList = (MIDIPacketList *)buffer;
     MIDIPacket *packet = MIDIPacketListInit(packetList);
-    packet = MIDIPacketListAdd(packetList, sizeof(buffer), packet, 0, [data length], [data bytes]);
+    packet = MIDIPacketListAdd(packetList, sizeof(buffer), packet, timestamp, [data length], [data bytes]);
     
     MIDISend(outputPortRef, endpoint, packetList);
 
@@ -171,6 +175,8 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
 {
     self = [super init];
     if (self) {
+        mach_timebase_info(&_base);
+
         [self createMIDIClient];
     }
     
