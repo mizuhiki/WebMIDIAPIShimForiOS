@@ -45,9 +45,12 @@
         this._destinations = null;
         this._inputs = null;
         this._outputs = null;
+        this._timestampOrigin = 0;
         _this = this;
 
         _callback_onReady = function(sources, destinations) {
+            _this._timestampOrigin = window.performance.now();
+ 
             var inputs = new Array(sources.length);
             for (var i = 0; i < sources.length; i++ ) {
                 inputs[i] = new MIDIInput( sources[i].id, sources[i].name, sources[i].manufacturer, i );
@@ -73,7 +76,7 @@
             var evt = document.createEvent( "Event" );
 
             evt.initEvent( "midimessage", false, false );
-            evt.receivedTime = receivedTime;
+            evt.receivedTime = receivedTime + _this._timestampOrigin;
             evt.data = data;
 
             var input = _this._inputs[index];

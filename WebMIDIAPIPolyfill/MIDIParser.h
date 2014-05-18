@@ -21,14 +21,14 @@
 @class MIDIParser;
 
 @protocol MIDIParserDelegate
-- (void)midiParser:(MIDIParser *)parser recvMessage:(uint8_t *)message length:(uint32_t)length;
+- (void)midiParser:(MIDIParser *)parser recvMessage:(uint8_t *)message length:(uint32_t)length timestamp:(uint64_t)timestamp;
 @end
 
 @interface MIDIParser : NSObject {
     id <MIDIParserDelegate> __weak delegate;
 }
 
-- (void)setMessage:(uint8_t *)message length:(uint32_t)length;
+- (void)setMessage:(uint8_t *)message length:(uint32_t)length timestamp:(uint64_t)timestamp;
 - (void)reset;
 
 @property (weak) id delegate;

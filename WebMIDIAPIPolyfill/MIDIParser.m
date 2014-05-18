@@ -69,7 +69,7 @@
     return len;
 }
 
-- (void)setMessage:(uint8_t *)message length:(uint32_t)length
+- (void)setMessage:(uint8_t *)message length:(uint32_t)length timestamp:(uint64_t)timestamp
 {
     const uint8_t *p = message;
     const uint8_t *end = message + length;
@@ -79,20 +79,20 @@
             // status byte (MSB is 1)
             if (*p >= 0xF8) {
                 // realtime message
-                [delegate midiParser:self recvMessage:(uint8_t *)p length:1];
+                [delegate midiParser:self recvMessage:(uint8_t *)p length:1 timestamp:timestamp];
             } else if (_sysex) {
                 // detected a status byte in SysEx
                 if (*p == 0xF7) {
                     // End of SysEx
                     [_sysex appendBytes:p length:1];
-                    [delegate midiParser:self recvMessage:(uint8_t *)[_sysex bytes] length:(uint32_t)[_sysex length]];
+                    [delegate midiParser:self recvMessage:(uint8_t *)[_sysex bytes] length:(uint32_t)[_sysex length] timestamp:timestamp];
                     _sysex = nil;
                 } else {
                     // A unrightful status byte was found in the SysEx message.
                     // Finish parsing the message forcedly.
                     uint8_t f7 = 0xf7;
                     [_sysex appendBytes:&f7 length:1];
-                    [delegate midiParser:self recvMessage:(uint8_t *)[_sysex bytes] length:(uint32_t)[_sysex length]];
+                    [delegate midiParser:self recvMessage:(uint8_t *)[_sysex bytes] length:(uint32_t)[_sysex length] timestamp:timestamp];
                     _sysex = nil;
 
                     // Continue to parse the unrightful status byte.
@@ -133,7 +133,7 @@
                 _filledBytes++;
                 
                 if (_totalBytes == _filledBytes) {
-                    [delegate midiParser:self recvMessage:_parsedMessage length:_totalBytes];
+                    [delegate midiParser:self recvMessage:_parsedMessage length:_totalBytes timestamp:timestamp];
                     _totalBytes = 0;
                     _filledBytes = 0;
                 }

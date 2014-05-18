@@ -17,6 +17,7 @@
  */
 
 #import <CoreMIDI/CoreMIDI.h>
+#import <mach/mach_time.h>
 
 #import "WebViewDelegate.h"
 
@@ -53,15 +54,22 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
     // Process informal URL schemes.
     NSString *urlStr = request.URL.absoluteString;
     if ([urlStr hasPrefix:kURLScheme_RequestSetup]) {
+        __block uint64_t timestampOrigin = 0;
+
+        mach_timebase_info_data_t base;
+        mach_timebase_info(&base);
+        
         // Setup the callback for receiving MIDI message.
-        _midiDriver.onReceiveMessage = ^(ItemCount index, NSData *receivedData) {
+        _midiDriver.onReceiveMessage = ^(ItemCount index, NSData *receivedData, uint64_t timestamp) {
             NSMutableArray *array = [NSMutableArray arrayWithCapacity:[receivedData length]];
             for (int i = 0; i < [receivedData length]; i++) {
                 [array addObject:[NSNumber numberWithUnsignedChar:((unsigned char *)[receivedData bytes])[i]]];
             }
             NSData *dataJSON = [NSJSONSerialization dataWithJSONObject:array options:0 error:nil];
             NSString *dataJSONStr = [[NSString alloc] initWithData:dataJSON encoding:NSUTF8StringEncoding];
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_receiveMIDIMessage(%lu, %d, %@);", index, 0, dataJSONStr]];
+
+            double deltaTime_ms = (double)(timestamp - timestampOrigin) * base.numer / base.denom / 1000000.0;
+            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_receiveMIDIMessage(%lu, %f, %@);", index, deltaTime_ms, dataJSONStr]];
         };
         
         // Send all MIDI ports information when the setup request is received.
@@ -91,10 +99,12 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
         NSData *destsJSON = [NSJSONSerialization dataWithJSONObject:dests options:0 error:nil];
         NSString *destsJSONStr = [[NSString alloc] initWithData:destsJSON encoding:NSUTF8StringEncoding];
 
+        timestampOrigin = mach_absolute_time();
+
         [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_onReady(%@, %@);", srcsJSONStr, destsJSONStr]];
         
-        
         return NO;
+
     } else if ([urlStr hasPrefix:kURLScheme_RequestSend]) {
         NSString *jsonStr = [[urlStr substringFromIndex:[kURLScheme_RequestSend length]] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSData *data = [jsonStr dataUsingEncoding:NSUTF8StringEncoding];

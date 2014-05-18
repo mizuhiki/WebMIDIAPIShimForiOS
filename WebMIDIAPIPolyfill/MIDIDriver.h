@@ -27,6 +27,6 @@
 
 - (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
 
-@property (nonatomic, copy) void (^onReceiveMessage)(ItemCount index, NSData *data);
+@property (nonatomic, copy) void (^onReceiveMessage)(ItemCount index, NSData *data, uint64_t timestamp);
 
 @end

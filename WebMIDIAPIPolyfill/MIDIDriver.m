@@ -30,6 +30,9 @@
 
 @implementation MIDIDriver
 
+#pragma mark -
+#pragma mark API
+
 - (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms
 {
     MIDIEndpointRef endpoint = MIDIGetDestination(index);
@@ -48,7 +51,7 @@
 #pragma mark -
 #pragma mark MIDIParser delegate
 
-- (void)midiParser:(MIDIParser *)parser recvMessage:(uint8_t *)message length:(uint32_t)length
+- (void)midiParser:(MIDIParser *)parser recvMessage:(uint8_t *)message length:(uint32_t)length timestamp:(uint64_t)timestamp
 {
     NSData *data = [[NSData alloc] initWithBytes:message length:length];
     
@@ -56,7 +59,7 @@
 
     dispatch_async(dispatch_get_main_queue(), ^{
         if (_onReceiveMessage) {
-            _onReceiveMessage(index, data);
+            _onReceiveMessage(index, data, timestamp);
         }
     });    
 }
@@ -69,7 +72,7 @@ static void MyMIDIInputProc(const MIDIPacketList *pktlist, void *readProcRefCon,
     UInt32 packetCount = pktlist->numPackets;
 
     for (NSInteger i = 0; i < packetCount; i++) {
-        [parser setMessage:packet->data length:packet->length];
+        [parser setMessage:packet->data length:packet->length timestamp:packet->timeStamp];
         packet = MIDIPacketNext(packet);
     }
 }
