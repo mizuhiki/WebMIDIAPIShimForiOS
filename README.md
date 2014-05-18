@@ -9,7 +9,6 @@ When launching the sample application, a simple web browser will show. It uses J
 Known issues
 --------------------
 * The native bridge script will be deactivate when moving pages by clicking links. I don't know how to inject JS codes to UIWebView permanently.
-* Timestamp parameters are not supported so far. It'll be supported in future release.
 
 Related projects
 --------------------
