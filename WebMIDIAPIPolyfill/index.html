@@ -18,7 +18,7 @@
                 (function () {
                     var _port = port;
                     inputs[_port].onmidimessage = function (event) {
-                        var str = "port:" + _port + ", ";
+                        var str = "port:" + _port + ", receivedTime:" + event.receivedTime.toFixed(2) + ", ";
                         for (var i = 0; i < event.data.length; i++) {
                             str += "0x" + event.data[i].toString(16) + " ";
                         }
@@ -74,11 +74,12 @@
 </head>
 <body>
 <h1>Web MIDI API sample</h1>
+<a href="javascript:setup();">[setup]</a>
 <a href="javascript:noteOn();">[note on]</a>
 <a href="javascript:noteOff();">[note off]</a>
-<a href="javascript:document.getElementById('messagelog').innerHTML = '';">[clear log]</a>
 
 <h2>MIDI input monitor</h2>
+<a href="javascript:document.getElementById('messagelog').innerHTML = '';">[clear log]</a>
 <pre id="messagelog" style="width:100%; height:80%; overflow:auto; border:1px solid #aaaaaa;"></pre>
 </body>
 </html>
