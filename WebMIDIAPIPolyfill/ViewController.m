@@ -44,6 +44,7 @@
     // Inherit the delgate.
     _webview = webview;
     _webview.delegate = _delegate;
+    _webview.scalesPageToFit = YES;
 
     // Inject Web MIDI API bridge JavaScript
     NSString *polyfill_path = [[NSBundle mainBundle] pathForResource:@"WebMIDIAPIPolyfill" ofType:@"js"];
