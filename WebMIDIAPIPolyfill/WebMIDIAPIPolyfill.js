@@ -200,50 +200,50 @@
     var perf = {}, props;
 
     function findAlt() {
-    var prefix = ['moz', 'webkit', 'o', 'ms'],
-    i = prefix.length,
-        //worst case, we use Date.now()
-        props = {
-            value: (function (start) {
-                return function () {
-                return Date.now() - start;
-                };
-            }(Date.now()))
-        };
-  
-    //seach for vendor prefixed version
-    for (; i >= 0; i--) {
-        if ((prefix[i] + "Now") in exports.performance) {
-            props.value = function (method) {
-                return function () {
-                    exports.performance[method]();
-                }
-            }(prefix[i] + "Now");
-            return props;
-        }
-    }
-  
-    //otherwise, try to use connectionStart
-    if ("timing" in exports.performance && "connectStart" in exports.performance.timing) {
-        //this pretty much approximates performance.now() to the millisecond
-        props.value = (function (start) {
-            return function() {
-                Date.now() - start;
+        var prefix = ['moz', 'webkit', 'o', 'ms'],
+        i = prefix.length,
+            //worst case, we use Date.now()
+            props = {
+                value: (function (start) {
+                    return function () {
+                        return Date.now() - start;
+                    };
+                }(Date.now()))
             };
-        }(exports.performance.timing.connectStart));
-    }
-    return props;
-  }
   
-  //if already defined, bail
-  if (("performance" in exports) && ("now" in exports.performance))
-    return;
-  if (!("performance" in exports))
-    Object.defineProperty(exports, "performance", {
-        get: function () {
-            return perf;
-        }});
-    //otherwise, performance is there, but not "now()"
+        //seach for vendor prefixed version
+        for (; i >= 0; i--) {
+            if ((prefix[i] + "Now") in exports.performance) {
+                props.value = function (method) {
+                    return function () {
+                        exports.performance[method]();
+                    }
+                }(prefix[i] + "Now");
+                return props;
+            }
+        }
+  
+        //otherwise, try to use connectionStart
+        if ("timing" in exports.performance && "connectStart" in exports.performance.timing) {
+            //this pretty much approximates performance.now() to the millisecond
+            props.value = (function (start) {
+                return function() {
+                    Date.now() - start;
+                };
+            }(exports.performance.timing.connectStart));
+        }
+        return props;
+    }
+  
+    //if already defined, bail
+    if (("performance" in exports) && ("now" in exports.performance))
+        return;
+    if (!("performance" in exports))
+        Object.defineProperty(exports, "performance", {
+            get: function () {
+                return perf;
+            }});
+        //otherwise, performance is there, but not "now()"
   
     props = findAlt();
     Object.defineProperty(exports.performance, "now", props);
