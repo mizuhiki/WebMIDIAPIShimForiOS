@@ -26,7 +26,13 @@
                         var messagelog = document.getElementById('messagelog');
                         messagelog.innerHTML += str + "\n";
                         messagelog.scrollTop = messagelog.scrollHeight;
-                    }
+                    };
+                 
+                    inputs[_port].ondisconnect = function (event) {
+                        var str = "port:" + _port + ", disconnected.";
+                        var messagelog = document.getElementById('messagelog');
+                        messagelog.innerHTML += str + "\n";
+                    };
                 }());
             }
         }
@@ -77,6 +83,10 @@
 <a href="javascript:setup();">[setup]</a>
 <a href="javascript:noteOn();">[note on]</a>
 <a href="javascript:noteOff();">[note off]</a>
+
+<a href="javascript:enableEventListener();">[enableEventListener]</a>
+<a href="javascript:disableEventListener();">[disableEventListener]</a>
+
 
 <h2>MIDI input monitor</h2>
 <a href="javascript:document.getElementById('messagelog').innerHTML = '';">[clear log]</a>

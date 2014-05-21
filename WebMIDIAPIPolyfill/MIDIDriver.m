@@ -24,6 +24,9 @@
 @interface MIDIDriver () {
     NSArray *_parsers;
     mach_timebase_info_data_t _base;
+    
+    NSArray *_destinationEndpointIDs;
+    NSArray *_sourceEndpointIDs;
 }
 
 @end
@@ -58,8 +61,8 @@
     ItemCount index = [_parsers indexOfObject:parser];
 
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_onReceiveMessage) {
-            _onReceiveMessage(index, data, timestamp);
+        if (_onMessageReceived) {
+            _onMessageReceived(index, data, timestamp);
         }
     });    
 }
@@ -80,12 +83,71 @@ static void MyMIDIInputProc(const MIDIPacketList *pktlist, void *readProcRefCon,
 static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
 {
     MIDIDriver *myself = (__bridge MIDIDriver *)refCon;
+    [myself onMIDINotification:notification];
+}
 
-    if (notification->messageID == kMIDIMsgSetupChanged) {
-        [myself disposeMIDIInPort];
-        [myself disposeMIDIOutPort];
-        [myself createMIDIInPort];
-        [myself createMIDIOutPort];
+- (void)onMIDINotification:(const MIDINotification *)notification
+{
+    switch (notification->messageID) {
+        case kMIDIMsgSetupChanged:
+            [self disposeMIDIInPort];
+            [self disposeMIDIOutPort];
+            [self createMIDIInPort];
+            [self createMIDIOutPort];
+            break;
+            
+        case kMIDIMsgObjectAdded:
+            {
+                MIDIObjectAddRemoveNotification *n = (MIDIObjectAddRemoveNotification *)notification;
+                switch (n->childType) {
+                    case kMIDIObjectType_Destination:
+                        break;
+                    case kMIDIObjectType_Source:
+                        break;
+                        
+                    default:
+                        break;
+                }
+            }
+            break;
+            
+        case kMIDIMsgObjectRemoved:
+            {
+                MIDIObjectAddRemoveNotification *n = (MIDIObjectAddRemoveNotification *)notification;
+                
+                MIDIEndpointRef endpointRef = (MIDIEndpointRef)n->child;
+                SInt32 uniqueId;
+                MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+                
+                switch (n->childType) {
+                    case kMIDIObjectType_Destination:
+                        {
+                            NSUInteger index = [_destinationEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                            NSAssert(index != NSNotFound, @"Removed unknown MIDI destination");
+                            if (_onDestinationPortRemoved) {
+                                _onDestinationPortRemoved(index);
+                            }
+                        }
+                        break;
+                    
+                    case kMIDIObjectType_Source:
+                        {
+                            NSUInteger index = [_sourceEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                            NSAssert(index != NSNotFound, @"Removed unknown MIDI source");
+                            if (_onSourcePortRemoved) {
+                                _onSourcePortRemoved(index);
+                            }
+                        }
+                        break;
+                    
+                    default:
+                        break;
+                }
+            }
+            break;
+            
+        default:
+            break;
     }
 }
 
@@ -103,18 +165,25 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
     // Get MIDI IN endpoints and connect them to the MIDI port.
     ItemCount sourceCount = MIDIGetNumberOfSources();
     NSMutableArray *parsers = [NSMutableArray arrayWithCapacity:sourceCount];
-    if (sourceCount > 0) {
-        for (ItemCount i = 0; i < sourceCount; i++) {
-            MIDIParser *parser = [[MIDIParser alloc] init];
-            parser.delegate = self;
-            [parsers addObject:parser];
-            
-            MIDIEndpointRef endpointRef = MIDIGetSource(i);
-            err = MIDIPortConnectSource(inputPortRef, endpointRef, (__bridge void *)parser);
-        }
+    NSMutableArray *sourceEndpointIDs = [NSMutableArray arrayWithCapacity:sourceCount];
+
+    for (ItemCount i = 0; i < sourceCount; i++) {
+        MIDIParser *parser = [[MIDIParser alloc] init];
+        parser.delegate = self;
+        [parsers addObject:parser];
+        
+        MIDIEndpointRef endpointRef = MIDIGetSource(i);
+        err = MIDIPortConnectSource(inputPortRef, endpointRef, (__bridge void *)parser);
+        
+        //
+        SInt32 uniqueId;
+        MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+        
+        [sourceEndpointIDs addObject:[NSNumber numberWithInt:uniqueId]];
     }
     
     _parsers = parsers;
+    _sourceEndpointIDs = sourceEndpointIDs;
 
     return YES;
 }
@@ -130,6 +199,19 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
         return NO;
     }
 
+    ItemCount destinationCount = MIDIGetNumberOfDestinations();
+    NSMutableArray *destinationEndpointIDs = [NSMutableArray arrayWithCapacity:destinationCount];
+    for (ItemCount i = 0; i < destinationCount; i++) {
+        MIDIEndpointRef endpointRef = MIDIGetDestination(i);
+
+        SInt32 uniqueId;
+        MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+        
+        [destinationEndpointIDs addObject:[NSNumber numberWithInt:uniqueId]];
+    }
+
+    _destinationEndpointIDs = destinationEndpointIDs;
+    
     return YES;
 }
 
