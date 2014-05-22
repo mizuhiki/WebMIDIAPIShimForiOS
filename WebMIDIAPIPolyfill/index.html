@@ -1,5 +1,6 @@
 <html>
 <head>
+<!-- <script type="text/javascript" src="WebMIDIAPIPolyfill.js"></script> -->
 <script type="text/javascript">
     var midiAccess = null;
 
@@ -15,6 +16,10 @@
 
             var inputs = midiAccess.inputs();
             for (var port = 0; port < inputs.length; port++) {
+                var str = "input port " + port + ", manufacturer: " + inputs[port].manufacturer + ", name: " + inputs[port].name;
+                var messagelog = document.getElementById('messagelog');
+                messagelog.innerHTML += str + "\n";
+
                 (function () {
                     var _port = port;
                     inputs[_port].onmidimessage = function (event) {
@@ -29,7 +34,19 @@
                     };
                  
                     inputs[_port].ondisconnect = function (event) {
-                        var str = "port:" + _port + ", disconnected.";
+                        var str = "input port:" + _port + ", disconnected.";
+                        var messagelog = document.getElementById('messagelog');
+                        messagelog.innerHTML += str + "\n";
+                    };
+                }());
+            }
+
+            var outputs = midiAccess.outputs();
+            for (var port = 0; port < outputs.length; port++) {
+                (function () {
+                    var _port = port;
+                    outputs[_port].ondisconnect = function (event) {
+                        var str = "output port:" + _port + ", disconnected.";
                         var messagelog = document.getElementById('messagelog');
                         messagelog.innerHTML += str + "\n";
                     };
@@ -42,10 +59,25 @@
         document.getElementById('messagelog').innerHTML += "event received" + "\n";
     }
 
+    function _inputPortDisconnectListener() {
+        document.getElementById('messagelog').innerHTML += "input disconnect event received" + "\n";
+    }
+
+
+    function _outputPortDisconnectListener() {
+        document.getElementById('messagelog').innerHTML += "output disconnect event received" + "\n";
+    }
+
     function enableEventListener() {
         var inputs = midiAccess.inputs();
         for (var port = 0; port < inputs.length; port++) {
             inputs[port].addEventListener("midimessage", _midiMessageListener, false);
+            inputs[port].addEventListener("disconnect", _inputPortDisconnectListener, false);
+        }
+
+        var outputs = midiAccess.outputs();
+        for (var port = 0; port < outputs.length; port++) {
+            outputs[port].addEventListener("disconnect", _outputPortDisconnectListener, false);
         }
     }
 
@@ -53,6 +85,12 @@
         var inputs = midiAccess.inputs();
         for (var port = 0; port < inputs.length; port++) {
             inputs[port].removeEventListener("midimessage", _midiMessageListener, false);
+            inputs[port].removeEventListener("disconnect", _inputPortDisconnectListener, false);
+        }
+
+        var outputs = midiAccess.outputs();
+        for (var port = 0; port < outputs.length; port++) {
+            outputs[port].removeEventListener("disconnect", _outputPortDisconnectListener, false);
         }
     }
 

@@ -86,6 +86,14 @@
         };
  
         _callback_removeDestination = function(index) {
+            var evt = document.createEvent( "Event" );
+
+            evt.initEvent( "disconnect", false, false );
+
+            var output = _this._outputs[index];
+            if (output != null) {
+                output.dispatchEvent(evt);
+            }
         };
 
         _callback_removeSource = function(index) {
@@ -120,23 +128,17 @@
         return this._outputs;
     };
 
-    MIDIInput = function MIDIInput( id, name, manufacturer, index ) {
+    MIDIPort = function MIDIPort() {
         this._listeners = {};
-        this._index = index;
-        this.id = id;
-        this.manufacturer = manufacturer;
-        this.name = name;
-        this.type = "input";
+        this.id = 0;
+        this.manufacturer = "";
+        this.name = "";
+        this.type = "";
         this.version = "";
         this.ondisconnect = null;
-        this.onmidimessage = null;
     };
 
-    MIDIInput.prototype.addEventListener = function (type, listener, useCapture ) {
-        if (type !== "midimessage" && type !== "disconnect") {
-            return;
-        }
- 
+    MIDIPort.prototype.addEventListener = function (type, listener, useCapture ) {
         var listeners = this._listeners[type];
         if (listeners != null) {
             for (var i = 0; i < listeners.length; i++) {
@@ -151,11 +153,7 @@
         this._listeners[type].push( listener );
     };
  
-    MIDIInput.prototype.removeEventListener = function (type, listener, useCapture ) {
-        if (type !== "midimessage" && type !== "disconnect") {
-            return;
-        }
-
+    MIDIPort.prototype.removeEventListener = function (type, listener, useCapture ) {
         var listeners = this._listeners[type];
         if (listeners != null) {
             for (var i = 0; i < listeners.length; i++) {
@@ -167,11 +165,11 @@
         }
     };
  
-    MIDIInput.prototype.preventDefault = function() {
+    MIDIPort.prototype.preventDefault = function() {
         this._pvtDef = true;
     };
  
-    MIDIInput.prototype.dispatchEvent = function (evt) {
+    MIDIPort.prototype.dispatchEvent = function (evt) {
         this._pvtDef = false;
 
         var listeners = this._listeners[evt.type];
@@ -202,6 +200,19 @@
 
         return this._pvtDef;
     };
+
+    MIDIInput = function MIDIInput( id, name, manufacturer, index ) {
+        this._index = index;
+        this.id = id;
+        this.manufacturer = manufacturer;
+        this.name = name;
+        this.type = "input";
+        this.version = "";
+        this.onmidimessage = null;
+    };
+
+    MIDIInput.prototype = new MIDIPort();
+ 
  
     MIDIOutput = function MIDIOutput( id, name, manufacturer, index ) {
         this._index = index;
@@ -211,6 +222,8 @@
         this.type = "output";
         this.version = "";
     };
+ 
+    MIDIOutput.prototype = new MIDIPort();
 
     MIDIOutput.prototype.send = function( data, timestamp ) {
         var delayBeforeSend = 0;
