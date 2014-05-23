@@ -42,8 +42,8 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
     
     NSDictionary *portInfo = @{ @"id"           : [NSNumber numberWithInt:uniqueId],
                                 @"version"      : [NSNumber numberWithInt:version],
-                                @"manufacturer" : (__bridge NSString *)manufacturer,
-                                @"name"         : (__bridge NSString *)name,
+                                @"manufacturer" : ((__bridge NSString *)manufacturer ?: @""),
+                                @"name"         : ((__bridge NSString *)name ?: @""),
                               };
     
     return portInfo;
