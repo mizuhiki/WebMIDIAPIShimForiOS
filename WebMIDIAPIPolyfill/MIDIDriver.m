@@ -21,12 +21,21 @@
 #import "MIDIDriver.h"
 #import "MIDIParser.h"
 
+@interface MIDINotificationLogItem : NSObject
+@property (nonatomic, assign) MIDIObjectAddRemoveNotification notification;
+@end
+
+@implementation MIDINotificationLogItem
+@end
+
 @interface MIDIDriver () {
     NSArray *_parsers;
     mach_timebase_info_data_t _base;
     
     NSArray *_destinationEndpointIDs;
     NSArray *_sourceEndpointIDs;
+
+    NSMutableArray *_midiNotificationLog;
 }
 
 @end
@@ -90,59 +99,97 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
 {
     switch (notification->messageID) {
         case kMIDIMsgSetupChanged:
+            // Notify removed MIDI ports
+            for (MIDINotificationLogItem *item in _midiNotificationLog) {
+                MIDIObjectAddRemoveNotification n = item.notification;
+                if (n.messageID == kMIDIMsgObjectRemoved) {
+                    MIDIEndpointRef endpointRef = (MIDIEndpointRef)n.child;
+                    SInt32 uniqueId;
+                    MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+
+                    switch (n.childType) {
+                        case kMIDIObjectType_Destination:
+                            {
+                                NSUInteger index = [_destinationEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                                NSAssert(index != NSNotFound, @"Removed unknown MIDI destination");
+                                if (_onDestinationPortRemoved) {
+                                    _onDestinationPortRemoved(index);
+                                }
+                            }
+                            break;
+                            
+                        case kMIDIObjectType_Source:
+                            {
+                                NSUInteger index = [_sourceEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                                NSAssert(index != NSNotFound, @"Removed unknown MIDI source");
+                                if (_onSourcePortRemoved) {
+                                    _onSourcePortRemoved(index);
+                                }
+                            }
+                            break;
+                            
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            // Rebuild the port ID tables and the received MIDI message parsers
             [self disposeMIDIInPort];
             [self disposeMIDIOutPort];
             [self createMIDIInPort];
             [self createMIDIOutPort];
+
+            // Notify added MIDI ports
+            for (MIDINotificationLogItem *item in _midiNotificationLog) {
+                MIDIObjectAddRemoveNotification n = item.notification;
+                if (n.messageID == kMIDIMsgObjectAdded) {
+                    MIDIEndpointRef endpointRef = (MIDIEndpointRef)n.child;
+                    SInt32 uniqueId;
+                    MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+
+                    switch (n.childType) {
+                        case kMIDIObjectType_Destination:
+                            {
+                                NSUInteger index = [_destinationEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                                NSAssert(index != NSNotFound, @"Added unknown MIDI destination");
+                                if (_onDestinationPortAdded) {
+                                    _onDestinationPortAdded(index);
+                                }
+                            }
+                            break;
+                            
+                        case kMIDIObjectType_Source:
+                            {
+                                NSUInteger index = [_sourceEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                                NSAssert(index != NSNotFound, @"Added unknown MIDI source");
+                                if (_onSourcePortAdded) {
+                                    _onSourcePortAdded(index);
+                                }
+                            }
+                            break;
+                            
+                        default:
+                            break;
+                    }
+                }
+            }
+            
+            _midiNotificationLog = nil;
+            
             break;
             
         case kMIDIMsgObjectAdded:
-            {
-                MIDIObjectAddRemoveNotification *n = (MIDIObjectAddRemoveNotification *)notification;
-                switch (n->childType) {
-                    case kMIDIObjectType_Destination:
-                        break;
-                    case kMIDIObjectType_Source:
-                        break;
-                        
-                    default:
-                        break;
-                }
-            }
-            break;
-            
         case kMIDIMsgObjectRemoved:
             {
-                MIDIObjectAddRemoveNotification *n = (MIDIObjectAddRemoveNotification *)notification;
-                
-                MIDIEndpointRef endpointRef = (MIDIEndpointRef)n->child;
-                SInt32 uniqueId;
-                MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
-                
-                switch (n->childType) {
-                    case kMIDIObjectType_Destination:
-                        {
-                            NSUInteger index = [_destinationEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
-                            NSAssert(index != NSNotFound, @"Removed unknown MIDI destination");
-                            if (_onDestinationPortRemoved) {
-                                _onDestinationPortRemoved(index);
-                            }
-                        }
-                        break;
-                    
-                    case kMIDIObjectType_Source:
-                        {
-                            NSUInteger index = [_sourceEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
-                            NSAssert(index != NSNotFound, @"Removed unknown MIDI source");
-                            if (_onSourcePortRemoved) {
-                                _onSourcePortRemoved(index);
-                            }
-                        }
-                        break;
-                    
-                    default:
-                        break;
+                if (_midiNotificationLog == nil) {
+                    _midiNotificationLog = [NSMutableArray array];
                 }
+                
+                MIDINotificationLogItem *item = [[MIDINotificationLogItem alloc] init];
+                item.notification = *((MIDIObjectAddRemoveNotification *)notification);
+
+                [_midiNotificationLog addObject:item];
             }
             break;
             

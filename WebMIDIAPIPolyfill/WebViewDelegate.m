@@ -71,6 +71,25 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
             double deltaTime_ms = (double)(timestamp - timestampOrigin) * base.numer / base.denom / 1000000.0;
             [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_receiveMIDIMessage(%lu, %f, %@);", index, deltaTime_ms, dataJSONStr]];
         };
+
+        __weak WebViewDelegate *weak_self = self;
+        _midiDriver.onDestinationPortAdded = ^(ItemCount index) {
+            MIDIEndpointRef endpoint = MIDIGetDestination(index);
+            NSDictionary *info = [weak_self portinfoFromEndpointRef:endpoint];
+            NSData *JSON = [NSJSONSerialization dataWithJSONObject:info options:0 error:nil];
+            NSString *JSONStr = [[NSString alloc] initWithData:JSON encoding:NSUTF8StringEncoding];
+
+            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_addDestination(%lu, %@);", index, JSONStr]];
+        };
+
+        _midiDriver.onSourcePortAdded = ^(ItemCount index) {
+            MIDIEndpointRef endpoint = MIDIGetSource(index);
+            NSDictionary *info = [weak_self portinfoFromEndpointRef:endpoint];
+            NSData *JSON = [NSJSONSerialization dataWithJSONObject:info options:0 error:nil];
+            NSString *JSONStr = [[NSString alloc] initWithData:JSON encoding:NSUTF8StringEncoding];
+            
+            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_addSource(%lu, %@);", index, JSONStr]];
+        };
         
         _midiDriver.onDestinationPortRemoved = ^(ItemCount index) {
             [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_removeDestination(%lu);", index]];

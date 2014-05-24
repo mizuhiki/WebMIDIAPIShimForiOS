@@ -15,13 +15,13 @@
             midiAccess = access;
 
             midiAccess.onconnect = function (event) {
-                var str = "midiAccess connect: " + event.port;
+                var str = "midiAccess connect: " + event.port.name;
                 var messagelog = document.getElementById('messagelog');
                 messagelog.innerHTML += str + "\n";
             }
 
             midiAccess.ondisconnect = function (event) {
-                var str = "midiAccess disconnect: " + event.port;
+                var str = "midiAccess disconnect: " + event.port.name;
                 var messagelog = document.getElementById('messagelog');
                 messagelog.innerHTML += str + "\n";
             }

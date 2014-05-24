@@ -97,6 +97,12 @@
                 }
                 break;
 
+            case "connect":
+                if (this.onconnect) {
+                    this.onconnect( evt );
+                }
+                break;
+
             case "disconnect":
                 if (this.ondisconnect) {
                     this.ondisconnect( evt );
@@ -154,6 +160,28 @@
                 input.dispatchEvent(evt);
             }
         };
+
+        _callback_addDestination = function(index, portInfo) {
+            var evt = document.createEvent( "Event" );
+            var output = new MIDIOutput(portInfo.id, portInfo.name, portInfo.manufacturer, index);
+ 
+            _this._outputs.splice(index, 0, output);
+ 
+            evt.initEvent( "connect", false, false );
+            evt.port = output;
+            _this.dispatchEvent(evt);
+        };
+
+        _callback_addSource = function(index, portInfo) {
+            var evt = document.createEvent( "Event" );
+            var input = new MIDIInput(portInfo.id, portInfo.name, portInfo.manufacturer, index);
+ 
+            _this._inputs.splice(index, 0, input);
+ 
+            evt.initEvent( "connect", false, false );
+            evt.port = input;
+            _this.dispatchEvent(evt);
+        };
  
         _callback_removeDestination = function(index) {
             var evt = document.createEvent( "Event" );
@@ -165,10 +193,12 @@
                 output.dispatchEvent(evt);
             }
 
-	    evt = document.createEvent( "Event" );
-	    evt.initEvent( "disconnect", false, false );
-	    evt.port = output;
-	    _this.dispatchEvent(evt);
+            evt = document.createEvent( "Event" );
+            evt.initEvent( "disconnect", false, false );
+            evt.port = output;
+            _this.dispatchEvent(evt);
+ 
+            _this._outputs.splice(index, 1);
         };
 
         _callback_removeSource = function(index) {
@@ -181,10 +211,12 @@
                 input.dispatchEvent(evt);
             }
 
-	    evt = document.createEvent( "Event" );
-	    evt.initEvent( "disconnect", false, false );
-	    evt.port = input;
-	    _this.dispatchEvent(evt);
+            evt = document.createEvent( "Event" );
+            evt.initEvent( "disconnect", false, false );
+            evt.port = input;
+            _this.dispatchEvent(evt);
+
+            _this._inputs.splice(index, 1);
         };
  
         setTimeout( function() { location.href = 'webmidi-onready://' }, 3 );
@@ -333,5 +365,3 @@
     props = findAlt();
     Object.defineProperty(exports.performance, "now", props);
 }(window));
-
-
