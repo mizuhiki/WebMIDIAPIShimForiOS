@@ -11,21 +11,7 @@
             alert("Web MIDI API is not available.");
         }
 
-        function success(access) {
-            midiAccess = access;
-
-            midiAccess.onconnect = function (event) {
-                var str = "midiAccess connect: " + event.port.name;
-                var messagelog = document.getElementById('messagelog');
-                messagelog.innerHTML += str + "\n";
-            }
-
-            midiAccess.ondisconnect = function (event) {
-                var str = "midiAccess disconnect: " + event.port.name;
-                var messagelog = document.getElementById('messagelog');
-                messagelog.innerHTML += str + "\n";
-            }
-
+        function setupEventHandler() {
             var inputs = midiAccess.inputs();
             for (var port = 0; port < inputs.length; port++) {
                 var str = "input port " + port + ", manufacturer: " + inputs[port].manufacturer + ", name: " + inputs[port].name;
@@ -65,60 +51,20 @@
                 }());
             }
         }
-    }
 
-    function _midiMessageListener() {
-        document.getElementById('messagelog').innerHTML += "event received" + "\n";
-    }
+        function success(access) {
+            midiAccess = access;
 
-    function _inputPortDisconnectListener() {
-        document.getElementById('messagelog').innerHTML += "input disconnect event received" + "\n";
-    }
+            midiAccess.onconnect = function (event) {
+                var str = "port: " + event.port.name + ", connected.";
+                var messagelog = document.getElementById('messagelog');
+                messagelog.innerHTML += str + "\n";
 
-    function _outputPortDisconnectListener() {
-        document.getElementById('messagelog').innerHTML += "output disconnect event received" + "\n";
-    }
+                setupEventHandler();
+            }
 
-    function _midiaccessConnectListener() {
-        document.getElementById('messagelog').innerHTML += "midiaccess connect event received" + "\n";
-    }
-
-    function _midiaccessDisconnectListener() {
-        document.getElementById('messagelog').innerHTML += "midiaccess disconnect event received" + "\n";
-    }
-
-
-
-    function enableEventListener() {
-        var inputs = midiAccess.inputs();
-        for (var port = 0; port < inputs.length; port++) {
-            inputs[port].addEventListener("midimessage", _midiMessageListener, false);
-            inputs[port].addEventListener("disconnect", _inputPortDisconnectListener, false);
+            setupEventHandler();
         }
-
-        var outputs = midiAccess.outputs();
-        for (var port = 0; port < outputs.length; port++) {
-            outputs[port].addEventListener("disconnect", _outputPortDisconnectListener, false);
-        }
-        
-        midiAccess.addEventListener("connect", _midiaccessConnectListener, false);
-        midiAccess.addEventListener("disconnect", _midiaccessDisconnectListener, false);
-    }
-
-    function disableEventListener() {
-        var inputs = midiAccess.inputs();
-        for (var port = 0; port < inputs.length; port++) {
-            inputs[port].removeEventListener("midimessage", _midiMessageListener, false);
-            inputs[port].removeEventListener("disconnect", _inputPortDisconnectListener, false);
-        }
-
-        var outputs = midiAccess.outputs();
-        for (var port = 0; port < outputs.length; port++) {
-            outputs[port].removeEventListener("disconnect", _outputPortDisconnectListener, false);
-        }
-        
-        midiAccess.removeEventListener("connect", _midiaccessConnectListener, false);
-        midiAccess.removeEventListener("disconnect", _midiaccessDisconnectListener, false);
     }
 
     function noteOn() {
@@ -148,10 +94,6 @@
 <a href="javascript:setup();">[setup]</a>
 <a href="javascript:noteOn();">[note on]</a>
 <a href="javascript:noteOff();">[note off]</a>
-
-<a href="javascript:enableEventListener();">[enableEventListener]</a>
-<a href="javascript:disableEventListener();">[disableEventListener]</a>
-
 
 <h2>MIDI input monitor</h2>
 <a href="javascript:document.getElementById('messagelog').innerHTML = '';">[clear log]</a>
