@@ -122,6 +122,7 @@
         this._timestampOrigin = 0;
         this.onconnect = null;
         this.ondisconnect = null;
+        this.sysexEnabled = true;
         _this = this;
 
         _callback_onReady = function(sources, destinations) {
