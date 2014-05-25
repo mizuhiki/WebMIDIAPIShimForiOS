@@ -27,6 +27,10 @@
 
 - (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
 
-@property (nonatomic, copy) void (^onReceiveMessage)(ItemCount index, NSData *data, uint64_t timestamp);
+@property (nonatomic, copy) void (^onMessageReceived)(ItemCount index, NSData *data, uint64_t timestamp);
+@property (nonatomic, copy) void (^onDestinationPortAdded)(ItemCount index);
+@property (nonatomic, copy) void (^onSourcePortAdded)(ItemCount index);
+@property (nonatomic, copy) void (^onDestinationPortRemoved)(ItemCount index);
+@property (nonatomic, copy) void (^onSourcePortRemoved)(ItemCount index);
 
 @end

@@ -1,5 +1,6 @@
 <html>
 <head>
+<!-- <script type="text/javascript" src="WebMIDIAPIPolyfill.js"></script> -->
 <script type="text/javascript">
     var midiAccess = null;
 
@@ -10,11 +11,13 @@
             alert("Web MIDI API is not available.");
         }
 
-        function success(access) {
-            midiAccess = access;
-
+        function setupEventHandler() {
             var inputs = midiAccess.inputs();
             for (var port = 0; port < inputs.length; port++) {
+                var str = "input port " + port + ", manufacturer: " + inputs[port].manufacturer + ", name: " + inputs[port].name;
+                var messagelog = document.getElementById('messagelog');
+                messagelog.innerHTML += str + "\n";
+
                 (function () {
                     var _port = port;
                     inputs[_port].onmidimessage = function (event) {
@@ -26,27 +29,41 @@
                         var messagelog = document.getElementById('messagelog');
                         messagelog.innerHTML += str + "\n";
                         messagelog.scrollTop = messagelog.scrollHeight;
-                    }
+                    };
+                 
+                    inputs[_port].ondisconnect = function (event) {
+                        var str = "input port:" + _port + ", disconnected.";
+                        var messagelog = document.getElementById('messagelog');
+                        messagelog.innerHTML += str + "\n";
+                    };
+                }());
+            }
+
+            var outputs = midiAccess.outputs();
+            for (var port = 0; port < outputs.length; port++) {
+                (function () {
+                    var _port = port;
+                    outputs[_port].ondisconnect = function (event) {
+                        var str = "output port:" + _port + ", disconnected.";
+                        var messagelog = document.getElementById('messagelog');
+                        messagelog.innerHTML += str + "\n";
+                    };
                 }());
             }
         }
-    }
 
-    function _midiMessageListener() {
-        document.getElementById('messagelog').innerHTML += "event received" + "\n";
-    }
+        function success(access) {
+            midiAccess = access;
 
-    function enableEventListener() {
-        var inputs = midiAccess.inputs();
-        for (var port = 0; port < inputs.length; port++) {
-            inputs[port].addEventListener("midimessage", _midiMessageListener, false);
-        }
-    }
+            midiAccess.onconnect = function (event) {
+                var str = "port: " + event.port.name + ", connected.";
+                var messagelog = document.getElementById('messagelog');
+                messagelog.innerHTML += str + "\n";
 
-    function disableEventListener() {
-        var inputs = midiAccess.inputs();
-        for (var port = 0; port < inputs.length; port++) {
-            inputs[port].removeEventListener("midimessage", _midiMessageListener, false);
+                setupEventHandler();
+            }
+
+            setupEventHandler();
         }
     }
 
