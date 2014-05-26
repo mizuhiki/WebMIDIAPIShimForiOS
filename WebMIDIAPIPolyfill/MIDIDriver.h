@@ -17,15 +17,14 @@
 */
 
 #import <Foundation/Foundation.h>
-#import <CoreMIDI/CoreMIDI.h>
 
-@interface MIDIDriver : NSObject {
-    MIDIClientRef clientRef;
-    MIDIPortRef inputPortRef;
-    MIDIPortRef outputPortRef;
-}
+@interface MIDIDriver : NSObject
 
 - (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
+- (NSDictionary *)portinfoFromDestinationEndpointIndex:(ItemCount)index;
+- (NSDictionary *)portinfoFromSourceEndpointIndex:(ItemCount)index;
+- (ItemCount)numberOfSources;
+- (ItemCount)numberOfDestinations;
 
 @property (nonatomic, copy) void (^onMessageReceived)(ItemCount index, NSData *data, uint64_t timestamp);
 @property (nonatomic, copy) void (^onDestinationPortAdded)(ItemCount index);

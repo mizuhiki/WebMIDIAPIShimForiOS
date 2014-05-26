@@ -16,7 +16,6 @@
  
  */
 
-#import <CoreMIDI/CoreMIDI.h>
 #import <mach/mach_time.h>
 
 #import "WebViewDelegate.h"
@@ -25,29 +24,6 @@ static NSString *kURLScheme_RequestSetup = @"webmidi-onready://";
 static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
 
 @implementation WebViewDelegate
-
-- (NSDictionary *)portinfoFromEndpointRef:(MIDIEndpointRef)endpoint
-{
-    SInt32 uniqueId;
-    MIDIObjectGetIntegerProperty(endpoint, kMIDIPropertyUniqueID, &uniqueId);
-    
-    CFStringRef manufacturer;
-    MIDIObjectGetStringProperty(endpoint, kMIDIPropertyManufacturer, &manufacturer);
-    
-    CFStringRef name;
-    MIDIObjectGetStringProperty(endpoint, kMIDIPropertyName, &name);
-    
-    SInt32 version;
-    MIDIObjectGetIntegerProperty(endpoint, kMIDIPropertyDriverVersion, &version);
-    
-    NSDictionary *portInfo = @{ @"id"           : [NSNumber numberWithInt:uniqueId],
-                                @"version"      : [NSNumber numberWithInt:version],
-                                @"manufacturer" : (__bridge NSString *)manufacturer,
-                                @"name"         : (__bridge NSString *)name,
-                              };
-    
-    return portInfo;
-}
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
@@ -72,10 +48,9 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
             [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_receiveMIDIMessage(%lu, %f, %@);", index, deltaTime_ms, dataJSONStr]];
         };
 
-        __weak WebViewDelegate *weak_self = self;
+        __weak MIDIDriver *midiDriver = _midiDriver;
         _midiDriver.onDestinationPortAdded = ^(ItemCount index) {
-            MIDIEndpointRef endpoint = MIDIGetDestination(index);
-            NSDictionary *info = [weak_self portinfoFromEndpointRef:endpoint];
+            NSDictionary *info = [midiDriver portinfoFromDestinationEndpointIndex:index];
             NSData *JSON = [NSJSONSerialization dataWithJSONObject:info options:0 error:nil];
             NSString *JSONStr = [[NSString alloc] initWithData:JSON encoding:NSUTF8StringEncoding];
 
@@ -83,8 +58,7 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
         };
 
         _midiDriver.onSourcePortAdded = ^(ItemCount index) {
-            MIDIEndpointRef endpoint = MIDIGetSource(index);
-            NSDictionary *info = [weak_self portinfoFromEndpointRef:endpoint];
+            NSDictionary *info = [midiDriver portinfoFromSourceEndpointIndex:index];
             NSData *JSON = [NSJSONSerialization dataWithJSONObject:info options:0 error:nil];
             NSString *JSONStr = [[NSString alloc] initWithData:JSON encoding:NSUTF8StringEncoding];
             
@@ -100,22 +74,20 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
         };
         
         // Send all MIDI ports information when the setup request is received.
-        ItemCount srcCount = MIDIGetNumberOfSources();
-        ItemCount destCount = MIDIGetNumberOfDestinations();
+        ItemCount srcCount  = [_midiDriver numberOfSources];
+        ItemCount destCount = [_midiDriver numberOfDestinations];
 
         NSMutableArray *srcs  = [NSMutableArray arrayWithCapacity:srcCount];
         NSMutableArray *dests = [NSMutableArray arrayWithCapacity:destCount];
 
 
         for (ItemCount srcIndex = 0; srcIndex < srcCount; srcIndex++) {
-            MIDIEndpointRef endpoint = MIDIGetSource(srcIndex);
-            NSDictionary *info = [self portinfoFromEndpointRef:endpoint];
+            NSDictionary *info = [_midiDriver portinfoFromSourceEndpointIndex:srcIndex];
             [srcs addObject:info];
         }
 
         for (ItemCount destIndex = 0; destIndex < destCount; destIndex++) {
-            MIDIEndpointRef endpoint = MIDIGetDestination(destIndex);
-            NSDictionary *info = [self portinfoFromEndpointRef:endpoint];
+            NSDictionary *info = [_midiDriver portinfoFromDestinationEndpointIndex:destIndex];
             [dests addObject:info];
         }
 
