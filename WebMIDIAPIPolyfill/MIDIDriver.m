@@ -50,41 +50,63 @@
 #pragma mark -
 #pragma mark API
 
-- (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms
+- (OSStatus)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms
 {
     MIDIEndpointRef endpoint = MIDIGetDestination(index);
+    if (endpoint == 0) {
+        return !noErr;
+    }
+
     MIDITimeStamp timestamp = mach_absolute_time() + deltatime_ms * 1000000 /* ns */ * _base.denom / _base.numer;
 
     Byte buffer[sizeof(MIDIPacketList) + [data length]];
     MIDIPacketList *packetList = (MIDIPacketList *)buffer;
     MIDIPacket *packet = MIDIPacketListInit(packetList);
     packet = MIDIPacketListAdd(packetList, sizeof(buffer), packet, timestamp, [data length], [data bytes]);
+    if (packet == NULL) {
+        return !noErr;
+    }
     
-    MIDISend(_outputPortRef, endpoint, packetList);
+    OSStatus status = MIDISend(_outputPortRef, endpoint, packetList);
 
-    return;
+    return status;
 }
 
 - (NSDictionary *)portinfoFromEndpointRef:(MIDIEndpointRef)endpoint
 {
+    OSStatus status;
+    NSDictionary *portInfo = nil;
+
     SInt32 uniqueId;
-    MIDIObjectGetIntegerProperty(endpoint, kMIDIPropertyUniqueID, &uniqueId);
+    status = MIDIObjectGetIntegerProperty(endpoint, kMIDIPropertyUniqueID, &uniqueId);
+    if (status != noErr) {
+        uniqueId = 0;
+    }
     
     CFStringRef manufacturer;
-    MIDIObjectGetStringProperty(endpoint, kMIDIPropertyManufacturer, &manufacturer);
+    status = MIDIObjectGetStringProperty(endpoint, kMIDIPropertyManufacturer, &manufacturer);
+    if (status != noErr) {
+        manufacturer = nil;
+    }
     
     CFStringRef name;
-    MIDIObjectGetStringProperty(endpoint, kMIDIPropertyName, &name);
+    status = MIDIObjectGetStringProperty(endpoint, kMIDIPropertyName, &name);
+    if (status != noErr) {
+        name = nil;
+    }
     
     SInt32 version;
-    MIDIObjectGetIntegerProperty(endpoint, kMIDIPropertyDriverVersion, &version);
+    status = MIDIObjectGetIntegerProperty(endpoint, kMIDIPropertyDriverVersion, &version);
+    if (status != noErr) {
+        version = 0;
+    }
     
-    NSDictionary *portInfo = @{ @"id"           : [NSNumber numberWithInt:uniqueId],
-                                @"version"      : [NSNumber numberWithInt:version],
-                                @"manufacturer" : ((__bridge NSString *)manufacturer ?: @""),
-                                @"name"         : ((__bridge NSString *)name ?: @""),
-                                };
-    
+    portInfo = @{ @"id"           : [NSNumber numberWithInt:uniqueId],
+                  @"version"      : [NSNumber numberWithInt:version],
+                  @"manufacturer" : ((__bridge_transfer NSString *)manufacturer ?: @""),
+                  @"name"         : ((__bridge_transfer NSString *)name ?: @""),
+                };
+
     return portInfo;
 }
 

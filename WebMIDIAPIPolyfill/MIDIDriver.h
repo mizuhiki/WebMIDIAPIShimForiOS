@@ -20,7 +20,7 @@
 
 @interface MIDIDriver : NSObject
 
-- (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
+- (OSStatus)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
 - (NSDictionary *)portinfoFromDestinationEndpointIndex:(ItemCount)index;
 - (NSDictionary *)portinfoFromSourceEndpointIndex:(ItemCount)index;
 - (ItemCount)numberOfSources;
