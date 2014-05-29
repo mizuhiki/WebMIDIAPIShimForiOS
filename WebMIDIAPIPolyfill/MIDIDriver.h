@@ -31,5 +31,6 @@
 @property (nonatomic, copy) void (^onSourcePortAdded)(ItemCount index);
 @property (nonatomic, copy) void (^onDestinationPortRemoved)(ItemCount index);
 @property (nonatomic, copy) void (^onSourcePortRemoved)(ItemCount index);
+@property (nonatomic, readonly) BOOL isAvailable;
 
 @end

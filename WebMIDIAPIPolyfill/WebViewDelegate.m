@@ -25,6 +25,11 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
 
 @implementation WebViewDelegate
 
+- (void)invokeJSCallback_onNotReady:(UIWebView *)webView
+{
+    [webView stringByEvaluatingJavaScriptFromString:@"_callback_onNotReady();"];
+}
+
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
     // Process informal URL schemes.
@@ -34,6 +39,11 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
 
         mach_timebase_info_data_t base;
         mach_timebase_info(&base);
+
+        if (_midiDriver.isAvailable == NO) {
+            [self invokeJSCallback_onNotReady:webView];
+            return NO;
+        }
         
         // Setup the callback for receiving MIDI message.
         _midiDriver.onMessageReceived = ^(ItemCount index, NSData *receivedData, uint64_t timestamp) {
@@ -83,19 +93,35 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
 
         for (ItemCount srcIndex = 0; srcIndex < srcCount; srcIndex++) {
             NSDictionary *info = [_midiDriver portinfoFromSourceEndpointIndex:srcIndex];
+            if (info == nil) {
+                [self invokeJSCallback_onNotReady:webView];
+                return NO;
+            }
             [srcs addObject:info];
         }
 
         for (ItemCount destIndex = 0; destIndex < destCount; destIndex++) {
             NSDictionary *info = [_midiDriver portinfoFromDestinationEndpointIndex:destIndex];
+            if (info == nil) {
+                [self invokeJSCallback_onNotReady:webView];
+                return NO;
+            }
             [dests addObject:info];
         }
 
         
         NSData *srcsJSON = [NSJSONSerialization dataWithJSONObject:srcs options:0 error:nil];
+        if (srcsJSON == nil) {
+            [self invokeJSCallback_onNotReady:webView];
+            return NO;
+        }
         NSString *srcsJSONStr = [[NSString alloc] initWithData:srcsJSON encoding:NSUTF8StringEncoding];
 
         NSData *destsJSON = [NSJSONSerialization dataWithJSONObject:dests options:0 error:nil];
+        if (destsJSON == nil) {
+            [self invokeJSCallback_onNotReady:webView];
+            return NO;
+        }
         NSString *destsJSONStr = [[NSString alloc] initWithData:destsJSON encoding:NSUTF8StringEncoding];
 
         timestampOrigin = mach_absolute_time();
