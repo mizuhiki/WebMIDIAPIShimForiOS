@@ -17,20 +17,20 @@
 */
 
 #import <Foundation/Foundation.h>
-#import <CoreMIDI/CoreMIDI.h>
 
-@interface MIDIDriver : NSObject {
-    MIDIClientRef clientRef;
-    MIDIPortRef inputPortRef;
-    MIDIPortRef outputPortRef;
-}
+@interface MIDIDriver : NSObject
 
-- (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
+- (OSStatus)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
+- (NSDictionary *)portinfoFromDestinationEndpointIndex:(ItemCount)index;
+- (NSDictionary *)portinfoFromSourceEndpointIndex:(ItemCount)index;
+- (ItemCount)numberOfSources;
+- (ItemCount)numberOfDestinations;
 
 @property (nonatomic, copy) void (^onMessageReceived)(ItemCount index, NSData *data, uint64_t timestamp);
 @property (nonatomic, copy) void (^onDestinationPortAdded)(ItemCount index);
 @property (nonatomic, copy) void (^onSourcePortAdded)(ItemCount index);
 @property (nonatomic, copy) void (^onDestinationPortRemoved)(ItemCount index);
 @property (nonatomic, copy) void (^onSourcePortRemoved)(ItemCount index);
+@property (nonatomic, readonly) BOOL isAvailable;
 
 @end

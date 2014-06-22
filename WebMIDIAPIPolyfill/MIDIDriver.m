@@ -17,6 +17,7 @@
  */
 
 #import <mach/mach_time.h>
+#import <CoreMIDI/CoreMIDI.h>
 
 #import "MIDIDriver.h"
 #import "MIDIParser.h"
@@ -29,6 +30,10 @@
 @end
 
 @interface MIDIDriver () {
+    MIDIClientRef _clientRef;
+    MIDIPortRef _inputPortRef;
+    MIDIPortRef _outputPortRef;
+
     NSArray *_parsers;
     mach_timebase_info_data_t _base;
     
@@ -45,19 +50,84 @@
 #pragma mark -
 #pragma mark API
 
-- (void)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms
+- (OSStatus)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms
 {
     MIDIEndpointRef endpoint = MIDIGetDestination(index);
+    if (endpoint == 0) {
+        return !noErr;
+    }
+
     MIDITimeStamp timestamp = mach_absolute_time() + deltatime_ms * 1000000 /* ns */ * _base.denom / _base.numer;
 
     Byte buffer[sizeof(MIDIPacketList) + [data length]];
     MIDIPacketList *packetList = (MIDIPacketList *)buffer;
     MIDIPacket *packet = MIDIPacketListInit(packetList);
     packet = MIDIPacketListAdd(packetList, sizeof(buffer), packet, timestamp, [data length], [data bytes]);
+    if (packet == NULL) {
+        return !noErr;
+    }
     
-    MIDISend(outputPortRef, endpoint, packetList);
+    OSStatus status = MIDISend(_outputPortRef, endpoint, packetList);
 
-    return;
+    return status;
+}
+
+- (NSDictionary *)portinfoFromEndpointRef:(MIDIEndpointRef)endpoint
+{
+    OSStatus status;
+    NSDictionary *portInfo = nil;
+
+    SInt32 uniqueId;
+    status = MIDIObjectGetIntegerProperty(endpoint, kMIDIPropertyUniqueID, &uniqueId);
+    if (status != noErr) {
+        uniqueId = 0;
+    }
+    
+    CFStringRef manufacturer;
+    status = MIDIObjectGetStringProperty(endpoint, kMIDIPropertyManufacturer, &manufacturer);
+    if (status != noErr) {
+        manufacturer = nil;
+    }
+    
+    CFStringRef name;
+    status = MIDIObjectGetStringProperty(endpoint, kMIDIPropertyName, &name);
+    if (status != noErr) {
+        name = nil;
+    }
+    
+    SInt32 version;
+    status = MIDIObjectGetIntegerProperty(endpoint, kMIDIPropertyDriverVersion, &version);
+    if (status != noErr) {
+        version = 0;
+    }
+    
+    portInfo = @{ @"id"           : [NSNumber numberWithInt:uniqueId],
+                  @"version"      : [NSNumber numberWithInt:version],
+                  @"manufacturer" : ((__bridge_transfer NSString *)manufacturer ?: @""),
+                  @"name"         : ((__bridge_transfer NSString *)name ?: @""),
+                };
+
+    return portInfo;
+}
+
+- (NSDictionary *)portinfoFromDestinationEndpointIndex:(ItemCount)index
+{
+    return [self portinfoFromEndpointRef:MIDIGetDestination(index)];
+}
+
+- (NSDictionary *)portinfoFromSourceEndpointIndex:(ItemCount)index
+{
+    return [self portinfoFromEndpointRef:MIDIGetSource(index)];
+}
+
+- (ItemCount)numberOfSources
+{
+    return MIDIGetNumberOfSources();
+}
+
+- (ItemCount)numberOfDestinations
+{
+    return MIDIGetNumberOfDestinations();
 }
 
 #pragma mark -
@@ -97,6 +167,8 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
 
 - (void)onMIDINotification:(const MIDINotification *)notification
 {
+    OSStatus status;
+    
     switch (notification->messageID) {
         case kMIDIMsgSetupChanged:
             // Notify removed MIDI ports
@@ -105,7 +177,8 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
                 if (n.messageID == kMIDIMsgObjectRemoved) {
                     MIDIEndpointRef endpointRef = (MIDIEndpointRef)n.child;
                     SInt32 uniqueId;
-                    MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+                    status = MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+                    NSAssert(status == noErr, @"MIDIObjectGetIntegerProperty(kMIDIPropertyUniqueID) error");
 
                     switch (n.childType) {
                         case kMIDIObjectType_Destination:
@@ -146,7 +219,8 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
                 if (n.messageID == kMIDIMsgObjectAdded) {
                     MIDIEndpointRef endpointRef = (MIDIEndpointRef)n.child;
                     SInt32 uniqueId;
-                    MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+                    status = MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+                    NSAssert(status == noErr, @"MIDIObjectGetIntegerProperty(kMIDIPropertyUniqueID) error");
 
                     switch (n.childType) {
                         case kMIDIObjectType_Destination:
@@ -203,9 +277,8 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
     OSStatus err;
     
     NSString *inputPortName = @"inputPort";
-    err = MIDIInputPortCreate(clientRef, (__bridge CFStringRef)inputPortName, MyMIDIInputProc, (__bridge void *)(self), &inputPortRef);
+    err = MIDIInputPortCreate(_clientRef, (__bridge CFStringRef)inputPortName, MyMIDIInputProc, (__bridge void *)(self), &_inputPortRef);
     if (err != noErr) {
-        NSLog(@"MIDIInputPortCreate err = %d", (int)err);
         return NO;
     }
     
@@ -220,11 +293,16 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
         [parsers addObject:parser];
         
         MIDIEndpointRef endpointRef = MIDIGetSource(i);
-        err = MIDIPortConnectSource(inputPortRef, endpointRef, (__bridge void *)parser);
+        err = MIDIPortConnectSource(_inputPortRef, endpointRef, (__bridge void *)parser);
+        if (err != noErr) {
+            return NO;
+        }
         
-        //
         SInt32 uniqueId;
-        MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+        err = MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+        if (err != noErr) {
+            return NO;
+        }
         
         [sourceEndpointIDs addObject:[NSNumber numberWithInt:uniqueId]];
     }
@@ -240,9 +318,8 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
     OSStatus err;
     
     NSString *outputPortName = @"outputPort";
-    err = MIDIOutputPortCreate(clientRef, (__bridge CFStringRef)outputPortName, &outputPortRef);
+    err = MIDIOutputPortCreate(_clientRef, (__bridge CFStringRef)outputPortName, &_outputPortRef);
     if (err != noErr) {
-        NSLog(@"MIDIOutputPortCreate err = %d", (int)err);
         return NO;
     }
 
@@ -252,7 +329,10 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
         MIDIEndpointRef endpointRef = MIDIGetDestination(i);
 
         SInt32 uniqueId;
-        MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+        err = MIDIObjectGetIntegerProperty(endpointRef, kMIDIPropertyUniqueID, &uniqueId);
+        if (err != noErr) {
+            return NO;
+        }
         
         [destinationEndpointIDs addObject:[NSNumber numberWithInt:uniqueId]];
     }
@@ -264,43 +344,50 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
 
 - (void)disposeMIDIInPort
 {
-    MIDIPortDispose(inputPortRef);
-    inputPortRef = 0;
+    OSStatus status;
+    status = MIDIPortDispose(_inputPortRef);
+    NSAssert(status == noErr, @"MIDIPortDispose error");
 
+    _inputPortRef = 0;
     _parsers = nil;
 }
 
 - (void)disposeMIDIOutPort
 {
-    MIDIPortDispose(outputPortRef);
-    outputPortRef = 0;
+    OSStatus status;
+    status = MIDIPortDispose(_outputPortRef);
+    NSAssert(status == noErr, @"MIDIPortDispose error");
+
+    _outputPortRef = 0;
 }
 
-- (void)createMIDIClient
+- (BOOL)createMIDIClient
 {
     OSStatus err;
 
     NSString *clientName = @"inputClient";
-    err = MIDIClientCreate((__bridge CFStringRef)clientName, MyMIDINotifyProc, (__bridge void *)(self), &clientRef);
+    err = MIDIClientCreate((__bridge CFStringRef)clientName, MyMIDINotifyProc, (__bridge void *)(self), &_clientRef);
     if (err != noErr) {
-        NSLog(@"MIDIClientCreate err = %d", (int)err);
-        return;
+        return NO;
     }
 
     if ([self createMIDIInPort] == NO) {
-        return;
+        return NO;
     }
 
     if ([self createMIDIOutPort] == NO) {
-        return;
+        return NO;
     }
 
-    return;
+    return YES;
 }
 
 - (void)disposeMIDIClient
 {
-    MIDIClientDispose(clientRef);
+    OSStatus status;
+    
+    status = MIDIClientDispose(_clientRef);
+    NSAssert(status == noErr, @"MIDIClientDispose");
 }
 
 - (id)init
@@ -309,7 +396,8 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
     if (self) {
         mach_timebase_info(&_base);
 
-        [self createMIDIClient];
+        BOOL result = [self createMIDIClient];
+        _isAvailable = result;
     }
     
     return self;
