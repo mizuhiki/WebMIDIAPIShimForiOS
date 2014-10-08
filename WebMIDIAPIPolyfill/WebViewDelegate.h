@@ -17,9 +17,10 @@
  */
 
 #import <Foundation/Foundation.h>
+#import <WebKit/WebKit.h>
 
 #import "MIDIDriver.h"
 
-@interface WebViewDelegate : NSObject <UIWebViewDelegate>
+@interface WebViewDelegate : NSObject <WKScriptMessageHandler>
 @property (nonatomic, strong) MIDIDriver *midiDriver;
 @end

@@ -30,30 +30,9 @@
 
 - (void)loadURL:(NSURL *)url
 {
-    // Create an instance of UIWebView
-    // To enable Web MIDI API shim, a JavaScript injection hack is used.
-    // But the hack is only effective at the first page loading.
-    // So, have to create an instance every page.
-    UIWebView *webview = [[UIWebView alloc] initWithFrame:_webview.frame];
-    webview.autoresizingMask = _webview.autoresizingMask;
-    
-    // Replace UIWebViews
-    [self.view insertSubview:webview aboveSubview:_webview];
-    [_webview removeFromSuperview];
-
-    // Inherit the delgate.
-    _webview = webview;
-    _webview.delegate = _delegate;
-    _webview.scalesPageToFit = YES;
-
-    // Inject Web MIDI API bridge JavaScript
-    NSString *polyfill_path = [[NSBundle mainBundle] pathForResource:@"WebMIDIAPIPolyfill" ofType:@"js"];
-    NSString *polyfill_script = [NSString stringWithContentsOfFile:polyfill_path encoding:NSUTF8StringEncoding error:nil];
-    [_webview stringByEvaluatingJavaScriptFromString:polyfill_script];
-    
     // Load URL
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
-    [_webview loadRequest:request];
+    [_webView loadRequest:request];
 }
 
 #pragma mark -
@@ -72,6 +51,25 @@
 {
     [super viewDidLoad];
 
+    // Create a delegate for handling informal URL schemes.
+    _delegate = [[WebViewDelegate alloc] init];
+    _delegate.midiDriver = [[MIDIDriver alloc] init];
+
+    // Inject Web MIDI API bridge JavaScript
+    NSString *polyfill_path = [[NSBundle mainBundle] pathForResource:@"WebMIDIAPIPolyfill" ofType:@"js"];
+    NSString *polyfill_script = [NSString stringWithContentsOfFile:polyfill_path encoding:NSUTF8StringEncoding error:nil];
+    WKUserScript *script = [[WKUserScript alloc] initWithSource:polyfill_script injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+    WKUserContentController *userContentController = [[WKUserContentController alloc] init];
+    [userContentController addUserScript:script];
+    [userContentController addScriptMessageHandler:_delegate name:@"onready"];
+    [userContentController addScriptMessageHandler:_delegate name:@"send"];
+
+    WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+    configuration.userContentController = userContentController;
+    
+    WKWebView *webView = [[WKWebView alloc] initWithFrame:self.view.bounds configuration:configuration];
+    [self.view addSubview:webView];
+
     // Create a URL input field on the navigation bar
     UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 30)];
     [textField setBorderStyle:UITextBorderStyleRoundedRect];
@@ -83,15 +81,12 @@
     [textField setClearButtonMode:UITextFieldViewModeWhileEditing];
     self.navigationItem.titleView = textField;
 
-     // Create a delegate for handling informal URL schemes.
-    _delegate = [[WebViewDelegate alloc] init];
-    _delegate.midiDriver = [[MIDIDriver alloc] init];
-
-    _webview.delegate = _delegate;
+    self.webView = webView;
 
     // Open sample HTML file at bundle path
     NSString *path = [[NSBundle mainBundle] pathForResource:@"index" ofType:@"html"];
-    [self loadURL:[NSURL fileURLWithPath:path]];
+    NSString *html = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    [_webView loadHTMLString:html baseURL:nil];
 }
 
 - (void)didReceiveMemoryWarning

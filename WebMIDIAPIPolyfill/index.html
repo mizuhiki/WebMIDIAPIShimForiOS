@@ -5,10 +5,12 @@
     var midiAccess = null;
 
     function setup() {
+        var messagelog = document.getElementById('messagelog');
         if (window.navigator.requestMIDIAccess) {
-            window.navigator.requestMIDIAccess().then( success, function() { alert("requestMIDIAccess() failed.") });
+            window.navigator.requestMIDIAccess().then( success, function() { messagelog.innerHTML += "requestMIDIAccess() failed."; });
         } else {
             alert("Web MIDI API is not available.");
+            messagelog.innerHTML += "Web MIDI API is not available.\n";
         }
 
         function setupEventHandler() {

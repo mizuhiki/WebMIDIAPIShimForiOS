@@ -20,29 +20,24 @@
 
 #import "WebViewDelegate.h"
 
-static NSString *kURLScheme_RequestSetup = @"webmidi-onready://";
-static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
-
 @implementation WebViewDelegate
 
-- (void)invokeJSCallback_onNotReady:(UIWebView *)webView
+- (void)invokeJSCallback_onNotReady:(WKWebView *)webView
 {
-    [webView stringByEvaluatingJavaScriptFromString:@"_callback_onNotReady();"];
+    [webView evaluateJavaScript:@"_callback_onNotReady();" completionHandler:nil];
 }
 
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
 {
-    // Process informal URL schemes.
-    NSString *urlStr = request.URL.absoluteString;
-    if ([urlStr hasPrefix:kURLScheme_RequestSetup]) {
+    if ([message.name isEqualToString:@"onready"] == YES) { // $$$
         __block uint64_t timestampOrigin = 0;
 
         mach_timebase_info_data_t base;
         mach_timebase_info(&base);
 
         if (_midiDriver.isAvailable == NO) {
-            [self invokeJSCallback_onNotReady:webView];
-            return NO;
+            [self invokeJSCallback_onNotReady:message.webView];
+            return;
         }
         
         // Setup the callback for receiving MIDI message.
@@ -55,7 +50,7 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
             NSString *dataJSONStr = [[NSString alloc] initWithData:dataJSON encoding:NSUTF8StringEncoding];
 
             double deltaTime_ms = (double)(timestamp - timestampOrigin) * base.numer / base.denom / 1000000.0;
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_receiveMIDIMessage(%lu, %f, %@);", index, deltaTime_ms, dataJSONStr]];
+            [message.webView evaluateJavaScript:[NSString stringWithFormat:@"_callback_receiveMIDIMessage(%lu, %f, %@);", index, deltaTime_ms, dataJSONStr] completionHandler:nil];
         };
 
         __weak MIDIDriver *midiDriver = _midiDriver;
@@ -64,7 +59,7 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
             NSData *JSON = [NSJSONSerialization dataWithJSONObject:info options:0 error:nil];
             NSString *JSONStr = [[NSString alloc] initWithData:JSON encoding:NSUTF8StringEncoding];
 
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_addDestination(%lu, %@);", index, JSONStr]];
+            [message.webView evaluateJavaScript:[NSString stringWithFormat:@"_callback_addDestination(%lu, %@);", index, JSONStr] completionHandler:nil];
         };
 
         _midiDriver.onSourcePortAdded = ^(ItemCount index) {
@@ -72,15 +67,15 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
             NSData *JSON = [NSJSONSerialization dataWithJSONObject:info options:0 error:nil];
             NSString *JSONStr = [[NSString alloc] initWithData:JSON encoding:NSUTF8StringEncoding];
             
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_addSource(%lu, %@);", index, JSONStr]];
+            [message.webView evaluateJavaScript:[NSString stringWithFormat:@"_callback_addSource(%lu, %@);", index, JSONStr] completionHandler:nil];
         };
         
         _midiDriver.onDestinationPortRemoved = ^(ItemCount index) {
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_removeDestination(%lu);", index]];
+            [message.webView evaluateJavaScript:[NSString stringWithFormat:@"_callback_removeDestination(%lu);", index] completionHandler:nil];
         };
         
         _midiDriver.onSourcePortRemoved = ^(ItemCount index) {
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_removeSource(%lu);", index]];
+            [message.webView evaluateJavaScript:[NSString stringWithFormat:@"_callback_removeSource(%lu);", index] completionHandler:nil];
         };
         
         // Send all MIDI ports information when the setup request is received.
@@ -94,8 +89,8 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
         for (ItemCount srcIndex = 0; srcIndex < srcCount; srcIndex++) {
             NSDictionary *info = [_midiDriver portinfoFromSourceEndpointIndex:srcIndex];
             if (info == nil) {
-                [self invokeJSCallback_onNotReady:webView];
-                return NO;
+                [self invokeJSCallback_onNotReady:message.webView];
+                return;
             }
             [srcs addObject:info];
         }
@@ -103,8 +98,8 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
         for (ItemCount destIndex = 0; destIndex < destCount; destIndex++) {
             NSDictionary *info = [_midiDriver portinfoFromDestinationEndpointIndex:destIndex];
             if (info == nil) {
-                [self invokeJSCallback_onNotReady:webView];
-                return NO;
+                [self invokeJSCallback_onNotReady:message.webView];
+                return;
             }
             [dests addObject:info];
         }
@@ -112,27 +107,25 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
         
         NSData *srcsJSON = [NSJSONSerialization dataWithJSONObject:srcs options:0 error:nil];
         if (srcsJSON == nil) {
-            [self invokeJSCallback_onNotReady:webView];
-            return NO;
+            [self invokeJSCallback_onNotReady:message.webView];
+            return;
         }
         NSString *srcsJSONStr = [[NSString alloc] initWithData:srcsJSON encoding:NSUTF8StringEncoding];
 
         NSData *destsJSON = [NSJSONSerialization dataWithJSONObject:dests options:0 error:nil];
         if (destsJSON == nil) {
-            [self invokeJSCallback_onNotReady:webView];
-            return NO;
+            [self invokeJSCallback_onNotReady:message.webView];
+            return;
         }
         NSString *destsJSONStr = [[NSString alloc] initWithData:destsJSON encoding:NSUTF8StringEncoding];
 
         timestampOrigin = mach_absolute_time();
 
-        [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"_callback_onReady(%@, %@);", srcsJSONStr, destsJSONStr]];
+        [message.webView evaluateJavaScript:[NSString stringWithFormat:@"_callback_onReady(%@, %@);", srcsJSONStr, destsJSONStr] completionHandler:nil];
         
-        return NO;
-
-    } else if ([urlStr hasPrefix:kURLScheme_RequestSend]) {
-        NSString *jsonStr = [[urlStr substringFromIndex:[kURLScheme_RequestSend length]] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSData *data = [jsonStr dataUsingEncoding:NSUTF8StringEncoding];
+        return;
+    } else if ([message.name isEqualToString:@"send"] == YES) { // $$$
+        NSData *data = [message.body dataUsingEncoding:NSUTF8StringEncoding];
         NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
 
         NSArray *array = dict[@"data"];
@@ -147,10 +140,8 @@ static NSString *kURLScheme_RequestSend  = @"webmidi-send://";
         float deltatime = [dict[@"deltaTime"] floatValue];
         [_midiDriver sendMessage:message toDestinationIndex:outputIndex deltatime:deltatime];
 
-        return NO;
+        return;
     }
-    
-    return YES;
 }
 
 @end

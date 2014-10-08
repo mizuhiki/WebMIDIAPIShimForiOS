@@ -27,6 +27,7 @@
 		C196571A190E78090085E3FE /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = C1965719190E78090085E3FE /* index.html */; };
 		C196571E190E82F80085E3FE /* WebMIDIAPIPolyfill.js in Resources */ = {isa = PBXBuildFile; fileRef = C196571D190E82F80085E3FE /* WebMIDIAPIPolyfill.js */; };
 		C1965721190FB74D0085E3FE /* WebViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C1965720190FB74D0085E3FE /* WebViewDelegate.m */; };
+		C1A6EB1819E2053F00748234 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1A6EB1719E2053F00748234 /* WebKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +69,7 @@
 		C196571D190E82F80085E3FE /* WebMIDIAPIPolyfill.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = WebMIDIAPIPolyfill.js; sourceTree = "<group>"; };
 		C196571F190FB74D0085E3FE /* WebViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewDelegate.h; sourceTree = "<group>"; };
 		C1965720190FB74D0085E3FE /* WebViewDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebViewDelegate.m; sourceTree = "<group>"; };
+		C1A6EB1719E2053F00748234 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1A6EB1819E2053F00748234 /* WebKit.framework in Frameworks */,
 				C19656E4190E771C0085E3FE /* CoreGraphics.framework in Frameworks */,
 				C19656E6190E771C0085E3FE /* UIKit.framework in Frameworks */,
 				C19656E2190E771C0085E3FE /* Foundation.framework in Frameworks */,
@@ -116,6 +119,7 @@
 		C19656E0190E771C0085E3FE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C1A6EB1719E2053F00748234 /* WebKit.framework */,
 				C19656E1190E771C0085E3FE /* Foundation.framework */,
 				C19656E3190E771C0085E3FE /* CoreGraphics.framework */,
 				C19656E5190E771C0085E3FE /* UIKit.framework */,
