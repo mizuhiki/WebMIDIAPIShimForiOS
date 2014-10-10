@@ -220,7 +220,7 @@
             _this._inputs.splice(index, 1);
         };
  
-        setTimeout( function() { window.webkit.messageHandlers.onready.postMessage(""); }, 3 );
+        window.webkit.messageHandlers.onready.postMessage("");
     };
 
     function _onReady() {
