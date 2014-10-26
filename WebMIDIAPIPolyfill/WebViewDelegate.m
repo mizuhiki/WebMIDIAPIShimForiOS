@@ -29,7 +29,7 @@
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
 {
-    if ([message.name isEqualToString:@"onready"] == YES) { // $$$
+    if ([message.name isEqualToString:@"onready"] == YES) {
         __block uint64_t timestampOrigin = 0;
 
         mach_timebase_info_data_t base;
@@ -124,7 +124,7 @@
         [message.webView evaluateJavaScript:[NSString stringWithFormat:@"_callback_onReady(%@, %@);", srcsJSONStr, destsJSONStr] completionHandler:nil];
         
         return;
-    } else if ([message.name isEqualToString:@"send"] == YES) { // $$$
+    } else if ([message.name isEqualToString:@"send"] == YES) {
         NSData *data = [message.body dataUsingEncoding:NSUTF8StringEncoding];
         NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
 
