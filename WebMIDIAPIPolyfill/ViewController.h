@@ -17,9 +17,10 @@
  */
 
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 
 @interface ViewController : UIViewController <UIWebViewDelegate>
 
-@property (weak, nonatomic) IBOutlet UIWebView *webview;
+@property (weak, nonatomic) WKWebView *webView;
 
 @end

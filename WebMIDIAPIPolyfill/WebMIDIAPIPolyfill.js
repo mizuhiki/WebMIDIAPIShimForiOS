@@ -220,7 +220,7 @@
             _this._inputs.splice(index, 1);
         };
  
-        setTimeout( function() { location.href = 'webmidi-onready://' }, 3 );
+        window.webkit.messageHandlers.onready.postMessage("");
     };
 
     function _onReady() {
@@ -297,7 +297,7 @@
 
         var outputData = new MIDIOutputData(this._index, data, delayBeforeSend);
 
-        location.href = 'webmidi-send://' + JSON.stringify(outputData);
+        window.webkit.messageHandlers.send.postMessage(JSON.stringify(outputData));
 
         return true;
     };
