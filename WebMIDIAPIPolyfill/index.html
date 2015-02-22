@@ -16,7 +16,16 @@
         }
 
         function setupEventHandler() {
-            var inputs = midiAccess.inputs();
+            if (typeof midiAccess.inputs === "function") {
+                inputs = midiAccess.inputs();
+            } else {
+                var iter = midiAccess.inputs.values();
+                inputs = [];
+                for (var o = iter.next(); !o.done; o = iter.next()) {
+                    inputs.push(o.value);
+                }
+            }
+
             for (var port = 0; port < inputs.length; port++) {
                 var str = "input port " + port + ", manufacturer: " + inputs[port].manufacturer + ", name: " + inputs[port].name;
                 var messagelog = document.getElementById('messagelog');
@@ -43,7 +52,16 @@
                 }());
             }
 
-            var outputs = midiAccess.outputs();
+            if (typeof midiAccess.outputs === "function") {
+                outputs = midiAccess.outputs();
+            } else {
+                var iter = midiAccess.outputs.values();
+                outputs = [];
+                for (var o = iter.next(); !o.done; o = iter.next()) {
+                    outputs.push(o.value);
+                }
+            }
+
             for (var port = 0; port < outputs.length; port++) {
                 (function () {
                     var _port = port;
