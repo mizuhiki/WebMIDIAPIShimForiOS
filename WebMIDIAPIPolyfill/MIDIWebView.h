@@ -1,6 +1,6 @@
 /*
  
- Copyright 2014 Takashi Mizuhiki
+ Copyright 2015 Takashi Mizuhiki
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
  
  */
 
-#import <UIKit/UIKit.h>
-#import "MIDIWebView.h"
+#import <WebKit/WebKit.h>
 
-@interface ViewController : UIViewController
+@interface MIDIWebView : WKWebView
 
-@property (weak, nonatomic) MIDIWebView *webView;
++ (WKWebViewConfiguration *)createConfiguration;
 
 @end

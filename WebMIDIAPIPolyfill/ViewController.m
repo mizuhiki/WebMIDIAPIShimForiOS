@@ -18,12 +18,6 @@
 
 #import "ViewController.h"
 #import "WebViewDelegate.h"
-#import "MIDIDriver.h"
-
-@interface ViewController () {
-    WebViewDelegate *_delegate;
-}
-@end
 
 @implementation ViewController
 
@@ -51,23 +45,9 @@
 {
     [super viewDidLoad];
 
-    // Create a delegate for handling informal URL schemes.
-    _delegate = [[WebViewDelegate alloc] init];
-    _delegate.midiDriver = [[MIDIDriver alloc] init];
+    WKWebViewConfiguration *configuration = [MIDIWebView createConfiguration];
 
-    // Inject Web MIDI API bridge JavaScript
-    NSString *polyfill_path = [[NSBundle mainBundle] pathForResource:@"WebMIDIAPIPolyfill" ofType:@"js"];
-    NSString *polyfill_script = [NSString stringWithContentsOfFile:polyfill_path encoding:NSUTF8StringEncoding error:nil];
-    WKUserScript *script = [[WKUserScript alloc] initWithSource:polyfill_script injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-    WKUserContentController *userContentController = [[WKUserContentController alloc] init];
-    [userContentController addUserScript:script];
-    [userContentController addScriptMessageHandler:_delegate name:@"onready"];
-    [userContentController addScriptMessageHandler:_delegate name:@"send"];
-
-    WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
-    configuration.userContentController = userContentController;
-    
-    WKWebView *webView = [[WKWebView alloc] initWithFrame:self.view.bounds configuration:configuration];
+    MIDIWebView *webView = [[MIDIWebView alloc] initWithFrame:self.view.bounds configuration:configuration];
     [self.view addSubview:webView];
 
     // Create a URL input field on the navigation bar

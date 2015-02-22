@@ -28,6 +28,7 @@
 		C196571E190E82F80085E3FE /* WebMIDIAPIPolyfill.js in Resources */ = {isa = PBXBuildFile; fileRef = C196571D190E82F80085E3FE /* WebMIDIAPIPolyfill.js */; };
 		C1965721190FB74D0085E3FE /* WebViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C1965720190FB74D0085E3FE /* WebViewDelegate.m */; };
 		C1A6EB1819E2053F00748234 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1A6EB1719E2053F00748234 /* WebKit.framework */; };
+		C1EDD81F1A98C64F006CFEC1 /* MIDIWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = C1EDD81E1A98C64F006CFEC1 /* MIDIWebView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,8 @@
 		C196571F190FB74D0085E3FE /* WebViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewDelegate.h; sourceTree = "<group>"; };
 		C1965720190FB74D0085E3FE /* WebViewDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebViewDelegate.m; sourceTree = "<group>"; };
 		C1A6EB1719E2053F00748234 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		C1EDD81D1A98C64F006CFEC1 /* MIDIWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MIDIWebView.h; sourceTree = "<group>"; };
+		C1EDD81E1A98C64F006CFEC1 /* MIDIWebView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MIDIWebView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,6 +140,8 @@
 				C19656F6190E771C0085E3FE /* Main_iPad.storyboard */,
 				C19656F9190E771C0085E3FE /* ViewController.h */,
 				C19656FA190E771C0085E3FE /* ViewController.m */,
+				C1EDD81D1A98C64F006CFEC1 /* MIDIWebView.h */,
+				C1EDD81E1A98C64F006CFEC1 /* MIDIWebView.m */,
 				C196571F190FB74D0085E3FE /* WebViewDelegate.h */,
 				C1965720190FB74D0085E3FE /* WebViewDelegate.m */,
 				C191EE3B1917B85E0014167A /* MIDIParser.h */,
@@ -281,6 +286,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C191EE3A1917B6DC0014167A /* MIDIDriver.m in Sources */,
+				C1EDD81F1A98C64F006CFEC1 /* MIDIWebView.m in Sources */,
 				C1965721190FB74D0085E3FE /* WebViewDelegate.m in Sources */,
 				C19656FB190E771C0085E3FE /* ViewController.m in Sources */,
 				C19656F2190E771C0085E3FE /* AppDelegate.m in Sources */,
