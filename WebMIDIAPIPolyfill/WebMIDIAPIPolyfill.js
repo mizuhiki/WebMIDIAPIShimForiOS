@@ -1,7 +1,7 @@
 /*
 
  Copyright 2013 Chris Wilson
- Copyright 2014 Takashi Mizuhiki
+ Copyright 2014-2015 Takashi Mizuhiki
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -21,28 +21,47 @@
 // https://github.com/cwilso/WebMIDIAPIShim
 
 (function (global) {
+    function Iterator(items) {
+        this._items = items;
+        this._index = 0;
+        this._maxIndex = items.length;
+    }
+ 
+    Iterator.prototype.next = function(){
+        if (this._index === this._maxIndex) {
+            return {value: undefined, done: true};
+        }
+
+        return {value: this._items[this._index++], done: false};
+    };
+ 
+    Iterator.prototype.reset = function(){
+        this._index = 0;
+    };
+ 
+
     function Promise() {
     }
 
     Promise.prototype.then = function(accept, reject) {
         this.accept = accept;
         this.reject = reject;
-    }
+    };
 
     Promise.prototype.succeed = function(access) {
         if (this.accept)
             this.accept(access);
-    }
+    };
 
     Promise.prototype.fail = function(error) {
         if (this.reject)
             this.reject(error);
-    }
+    };
 
 
     MIDIEventDispatcher = function MIDIEventDispatcher() {
         this._listeners = {};
-    }
+    };
 
     MIDIEventDispatcher.prototype.addEventListener = function (type, listener, useCapture) {
         var listeners = this._listeners[type];
@@ -123,6 +142,8 @@
         this.onconnect = null;
         this.ondisconnect = null;
         this.sysexEnabled = true;
+        this.inputs = null;
+        this.outputs = null;
         _this = this;
 
         _callback_onReady = function(sources, destinations) {
@@ -134,6 +155,7 @@
             }
  
             _this._inputs = inputs;
+            _this.inputs = _createMIDIPortMap(inputs);
  
             var outputs = new Array(destinations.length);
             for (var i = 0; i < destinations.length; i++ ) {
@@ -141,6 +163,7 @@
             }
 
             _this._outputs = outputs;
+            _this.outputs = _createMIDIPortMap(outputs);
  
             _onReady.bind(_this)();
         };
@@ -167,7 +190,8 @@
             var output = new MIDIOutput(portInfo.id, portInfo.name, portInfo.manufacturer, index);
  
             _this._outputs.splice(index, 0, output);
- 
+            _this.outputs = _createMIDIPortMap(_this._outputs);
+
             evt.initEvent( "connect", false, false );
             evt.port = output;
             _this.dispatchEvent(evt);
@@ -178,7 +202,8 @@
             var input = new MIDIInput(portInfo.id, portInfo.name, portInfo.manufacturer, index);
  
             _this._inputs.splice(index, 0, input);
- 
+            _this.inputs = _createMIDIPortMap(_this._inputs);
+
             evt.initEvent( "connect", false, false );
             evt.port = input;
             _this.dispatchEvent(evt);
@@ -200,6 +225,7 @@
             _this.dispatchEvent(evt);
  
             _this._outputs.splice(index, 1);
+            _this.outputs = _createMIDIPortMap(_this._outputs);
         };
 
         _callback_removeSource = function(index) {
@@ -218,6 +244,7 @@
             _this.dispatchEvent(evt);
 
             _this._inputs.splice(index, 1);
+            _this.inputs = _createMIDIPortMap(_this._inputs);
         };
  
         window.webkit.messageHandlers.onready.postMessage("");
@@ -226,22 +253,66 @@
     function _onReady() {
         if (this._promise)
             this._promise.succeed(this);
-    };
+    }
 
     function _onNotReady() {
         if (this._promise)
             this._promise.fail( { code: 1 } );
-    };
+    }
+
+    function _createMIDIPortMap(list) {
+        var size = list.length,
+            values = [],
+            keys = [],
+            entries = [],
+            portsById = {},
+            port, i;
+ 
+        for(i = 0; i < size; i++) {
+            port = list[i];
+
+            entries.push([port.id, port]);
+            values.push(port);
+            keys.push(port.id);
+            portsById[port.id] = port;
+        }
+ 
+        keys = new Iterator(keys);
+        values = new Iterator(values);
+        entries = new Iterator(entries);
+ 
+        return {
+            size: size,
+            forEach: function(cb) {
+                var i, entry;
+                for (i = 0; i < size; i++) {
+                    entry = entries[i];
+                    cb(entry[0], entry[1]);
+                }
+            },
+            keys: function() {
+                keys.reset();
+                return keys;
+            },
+            values: function() {
+                values.reset();
+                return values;
+            },
+            entries: function() {
+                entries.reset();
+                return entries;
+            },
+            get: function(id) {
+                return portsById[id];
+            },
+            has: function(id) {
+                return portsById[id] !== undefined;
+            }
+        };
+    }
 
     MIDIAccess.prototype = new MIDIEventDispatcher();
 
-    MIDIAccess.prototype.inputs = function() {
-        return this._inputs;
-    };
- 
-    MIDIAccess.prototype.outputs = function() {
-        return this._outputs;
-    };
 
     MIDIPort = function MIDIPort() {
         this.id = 0;
