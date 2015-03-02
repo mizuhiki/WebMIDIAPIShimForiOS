@@ -370,13 +370,13 @@
 
         var outputData = new MIDIOutputData(this._index, data, delayBeforeSend);
 
-        window.webkit.messageHandlers.send.postMessage(JSON.stringify(outputData));
+        window.webkit.messageHandlers.send.postMessage(outputData);
 
         return true;
     };
 
-    _requestMIDIAccess = function _requestMIDIAccess() {
-        var access = new MIDIAccess();
+    _requestMIDIAccess = function _requestMIDIAccess( options ) {
+        var access = new MIDIAccess( options );
         return access._promise;
     };
 

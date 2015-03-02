@@ -151,11 +151,9 @@
         
         return;
     } else if ([message.name isEqualToString:@"send"] == YES) {
-        NSData *data = [message.body dataUsingEncoding:NSUTF8StringEncoding];
-        NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-
+        NSDictionary *dict = message.body;
+        
         NSArray *array = dict[@"data"];
-
         NSMutableData *message = [NSMutableData dataWithCapacity:[array count]];
         BOOL sysexIncluded = NO;
         for (NSNumber *number in array) {
