@@ -132,7 +132,7 @@
         return this._pvtDef;
     };
 
-    MIDIAccess = function() {
+    MIDIAccess = function(options) {
         this._promise = new Promise;
         this._sources = null;
         this._destinations = null;
@@ -247,7 +247,9 @@
             _this.inputs = _createMIDIPortMap(_this._inputs);
         };
  
-        window.webkit.messageHandlers.onready.postMessage("");
+        var param = { "options": options, "url" : document.location.href };
+ 
+        window.webkit.messageHandlers.onready.postMessage(param);
     };
 
     function _onReady() {

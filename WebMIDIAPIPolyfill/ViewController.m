@@ -45,7 +45,7 @@
 {
     [super viewDidLoad];
 
-    WKWebViewConfiguration *configuration = [MIDIWebView createConfiguration];
+    WKWebViewConfiguration *configuration = [MIDIWebView createConfigurationWithSysExConfirmation:^(NSString *url) { return YES; }];
 
     MIDIWebView *webView = [[MIDIWebView alloc] initWithFrame:self.view.bounds configuration:configuration];
     [self.view addSubview:webView];

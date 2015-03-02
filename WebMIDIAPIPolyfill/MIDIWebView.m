@@ -22,12 +22,13 @@
 
 @implementation MIDIWebView
 
-+ (WKWebViewConfiguration *)createConfiguration
++ (WKWebViewConfiguration *)createConfigurationWithSysExConfirmation:(BOOL (^)(NSString *url))confirmSysExAvailability
 {
     WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
 
     WebViewDelegate *delegate = [[WebViewDelegate alloc] init];
     delegate.midiDriver = [[MIDIDriver alloc] init];
+    delegate.confirmSysExAvailability = confirmSysExAvailability;
     
     // Create a delegate for handling informal URL schemes.
     NSString *polyfill_path = [[NSBundle mainBundle] pathForResource:@"WebMIDIAPIPolyfill" ofType:@"js"];

@@ -9,7 +9,7 @@
     function setup() {
         var messagelog = document.getElementById('messagelog');
         if (window.navigator.requestMIDIAccess) {
-            window.navigator.requestMIDIAccess().then( success, function() { messagelog.innerHTML += "requestMIDIAccess() failed."; });
+            window.navigator.requestMIDIAccess( { sysex : true } ).then( success, function() { messagelog.innerHTML += "requestMIDIAccess() failed.\n"; });
         } else {
             alert("Web MIDI API is not available.");
             messagelog.innerHTML += "Web MIDI API is not available.\n";

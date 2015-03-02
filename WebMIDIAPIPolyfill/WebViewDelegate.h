@@ -23,4 +23,5 @@
 
 @interface WebViewDelegate : NSObject <WKScriptMessageHandler>
 @property (nonatomic, strong) MIDIDriver *midiDriver;
+@property (nonatomic, copy) BOOL (^confirmSysExAvailability)(NSString *url);
 @end

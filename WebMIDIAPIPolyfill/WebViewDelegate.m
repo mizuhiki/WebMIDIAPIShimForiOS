@@ -20,6 +20,11 @@
 
 #import "WebViewDelegate.h"
 
+@interface WebViewDelegate () {
+    BOOL _sysexEnabled;
+}
+@end
+
 @implementation WebViewDelegate
 
 - (void)invokeJSCallback_onNotReady:(WKWebView *)webView
@@ -35,6 +40,27 @@
         mach_timebase_info_data_t base;
         mach_timebase_info(&base);
 
+        NSDictionary *dict = message.body;
+        
+        NSDictionary *MIDIoptions = dict[@"options"];
+        NSString *url = dict[@"url"];
+
+        _sysexEnabled = NO;
+        id sysexOption = MIDIoptions[@"sysex"];
+        if ([sysexOption isKindOfClass:[NSNumber class]] && [sysexOption boolValue] == YES) {
+            if (_confirmSysExAvailability) {
+                if (_confirmSysExAvailability(url) == NO) {
+                    [self invokeJSCallback_onNotReady:message.webView];
+                    return;
+                } else {
+                    _sysexEnabled = YES;
+                }
+            } else {
+                [self invokeJSCallback_onNotReady:message.webView];
+                return;
+            }
+        }
+        
         if (_midiDriver.isAvailable == NO) {
             [self invokeJSCallback_onNotReady:message.webView];
             return;
@@ -131,11 +157,21 @@
         NSArray *array = dict[@"data"];
 
         NSMutableData *message = [NSMutableData dataWithCapacity:[array count]];
+        BOOL sysexIncluded = NO;
         for (NSNumber *number in array) {
             uint8_t byte = [number unsignedIntegerValue];
             [message appendBytes:&byte length:1];
+
+            if (byte == 0xf0) {
+                sysexIncluded = YES;
+            }
         }
 
+        if (_sysexEnabled == NO && sysexIncluded == YES) {
+            // should throw InvalidAccessError exception here
+            return;
+        }
+        
         ItemCount outputIndex = [dict[@"outputPortIndex"] unsignedLongValue];
         float deltatime = [dict[@"deltaTime"] floatValue];
         [_midiDriver sendMessage:message toDestinationIndex:outputIndex deltatime:deltatime];

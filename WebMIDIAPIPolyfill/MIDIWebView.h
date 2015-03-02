@@ -20,6 +20,6 @@
 
 @interface MIDIWebView : WKWebView
 
-+ (WKWebViewConfiguration *)createConfiguration;
++ (WKWebViewConfiguration *)createConfigurationWithSysExConfirmation:(BOOL (^)(NSString *url))confirmSysExAvailability;
 
 @end
