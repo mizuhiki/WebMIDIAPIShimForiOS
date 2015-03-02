@@ -9,14 +9,23 @@
     function setup() {
         var messagelog = document.getElementById('messagelog');
         if (window.navigator.requestMIDIAccess) {
-            window.navigator.requestMIDIAccess().then( success, function() { messagelog.innerHTML += "requestMIDIAccess() failed."; });
+            window.navigator.requestMIDIAccess( { sysex : true } ).then( success, function() { messagelog.innerHTML += "requestMIDIAccess() failed.\n"; });
         } else {
             alert("Web MIDI API is not available.");
             messagelog.innerHTML += "Web MIDI API is not available.\n";
         }
 
         function setupEventHandler() {
-            var inputs = midiAccess.inputs();
+            if (typeof midiAccess.inputs === "function") {
+                inputs = midiAccess.inputs();
+            } else {
+                var iter = midiAccess.inputs.values();
+                inputs = [];
+                for (var o = iter.next(); !o.done; o = iter.next()) {
+                    inputs.push(o.value);
+                }
+            }
+
             for (var port = 0; port < inputs.length; port++) {
                 var str = "input port " + port + ", manufacturer: " + inputs[port].manufacturer + ", name: " + inputs[port].name;
                 var messagelog = document.getElementById('messagelog');
@@ -43,7 +52,16 @@
                 }());
             }
 
-            var outputs = midiAccess.outputs();
+            if (typeof midiAccess.outputs === "function") {
+                outputs = midiAccess.outputs();
+            } else {
+                var iter = midiAccess.outputs.values();
+                outputs = [];
+                for (var o = iter.next(); !o.done; o = iter.next()) {
+                    outputs.push(o.value);
+                }
+            }
+
             for (var port = 0; port < outputs.length; port++) {
                 (function () {
                     var _port = port;
@@ -75,18 +93,16 @@
     }
 
     function noteOn() {
-        var outputs = midiAccess.outputs();
-        for (var i = 0; i < outputs.length; i++) {
-            var output = outputs[i];
-            output.send( [0x90, 60, 0x40] , window.performance.now() );
+        var iter = midiAccess.outputs.values();
+        for (var o = iter.next(); !o.done; o = iter.next()) {
+            o.value.send( [0x90, 60, 0x40] , window.performance.now() );
         }
     }
 
     function noteOff() {
-        var outputs = midiAccess.outputs();
-        for (var i = 0; i < outputs.length; i++) {
-            var output = outputs[i];
-            output.send( [0x80, 60, 0x40] , window.performance.now() );
+        var iter = midiAccess.outputs.values();
+        for (var o = iter.next(); !o.done; o = iter.next()) {
+            o.value.send( [0x80, 60, 0x00] , window.performance.now() );
         }
     }
 

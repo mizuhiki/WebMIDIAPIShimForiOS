@@ -1,6 +1,6 @@
 /*
  
- Copyright 2014 Takashi Mizuhiki
+ Copyright 2015 Takashi Mizuhiki
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,12 +16,10 @@
  
  */
 
-#import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 
-#import "MIDIDriver.h"
+@interface MIDIWebView : WKWebView
 
-@interface WebViewDelegate : NSObject <WKScriptMessageHandler>
-@property (nonatomic, strong) MIDIDriver *midiDriver;
-@property (nonatomic, copy) BOOL (^confirmSysExAvailability)(NSString *url);
++ (WKWebViewConfiguration *)createConfigurationWithSysExConfirmation:(BOOL (^)(NSString *url))confirmSysExAvailability;
+
 @end

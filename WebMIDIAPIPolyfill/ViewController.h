@@ -17,10 +17,10 @@
  */
 
 #import <UIKit/UIKit.h>
-#import <WebKit/WebKit.h>
+#import "MIDIWebView.h"
 
-@interface ViewController : UIViewController <UIWebViewDelegate>
+@interface ViewController : UIViewController
 
-@property (weak, nonatomic) WKWebView *webView;
+@property (weak, nonatomic) MIDIWebView *webView;
 
 @end
