@@ -364,7 +364,7 @@
 
         MIDIOutputData = function ( outputPortIndex, data, deltaTime ) {
             this.outputPortIndex = outputPortIndex;
-            this.data = data;
+            this.data = data.map(function(i) { return Number(i); }); // convert "data" to an array of Number
             this.deltaTime = deltaTime;
         };
 
