@@ -22,6 +22,43 @@
 #import "MIDIDriver.h"
 #import "MIDIParser.h"
 
+
+@interface EndpointInfo : NSObject
+@end
+
+@implementation EndpointInfo
+@end
+
+@interface CoreMIDIEndpointInfo : EndpointInfo
+@property (nonatomic, assign) SInt32 uniqueId;
+@end
+
+@implementation CoreMIDIEndpointInfo
+@end
+
+@interface VirtualEndpointInfo : EndpointInfo
+@property (nonatomic, strong) NSString *name;
+@end
+
+@implementation VirtualEndpointInfo
+@end
+
+@implementation NSArray (CoreEndpointInfo)
+
+- (NSUInteger)indexOfUniqueId:(SInt32)uniqueId
+{
+    for (NSUInteger index = 0; index < [self count]; index++) {
+        CoreMIDIEndpointInfo *info = self[index];
+        if (info.uniqueId == uniqueId) {
+            return index;
+        }
+    }
+    
+    return NSNotFound;
+}
+
+@end
+
 @interface MIDINotificationLogItem : NSObject
 @property (nonatomic, assign) MIDIObjectAddRemoveNotification notification;
 @end
@@ -37,9 +74,12 @@
     NSArray *_parsers;
     mach_timebase_info_data_t _base;
     
-    NSArray *_destinationEndpointIDs;
-    NSArray *_sourceEndpointIDs;
+    NSArray *_destEndpointInfoArray;
+    NSArray *_srcEndpointInfoArray;
 
+    NSMutableArray *_virtualDestEndpointInfoArray;
+    NSMutableArray *_virtualSrcEndpointInfoArray;
+    
     NSMutableArray *_midiNotificationLog;
 }
 
@@ -52,24 +92,48 @@
 
 - (OSStatus)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms
 {
-    MIDIEndpointRef endpoint = MIDIGetDestination(index);
-    if (endpoint == 0) {
-        return !noErr;
-    }
-
     MIDITimeStamp timestamp = mach_absolute_time() + deltatime_ms * 1000000 /* ns */ * _base.denom / _base.numer;
+    
+    if (index < [_destEndpointInfoArray count]) {
+        // proper Core MIDI endpoints
+        MIDIEndpointRef endpoint = MIDIGetDestination(index);
+        if (endpoint == 0) {
+            return !noErr;
+        }
+        
+        Byte buffer[sizeof(MIDIPacketList) + [data length]];
+        MIDIPacketList *packetList = (MIDIPacketList *)buffer;
+        MIDIPacket *packet = MIDIPacketListInit(packetList);
+        packet = MIDIPacketListAdd(packetList, sizeof(buffer), packet, timestamp, [data length], [data bytes]);
+        if (packet == NULL) {
+            return !noErr;
+        }
+        
+        OSStatus status = MIDISend(_outputPortRef, endpoint, packetList);
+        
+        return status;
+    } else {
+        // virtual endpoints
+        ItemCount virtualDestIndex = index - [_destEndpointInfoArray count];
 
-    Byte buffer[sizeof(MIDIPacketList) + [data length]];
-    MIDIPacketList *packetList = (MIDIPacketList *)buffer;
-    MIDIPacket *packet = MIDIPacketListInit(packetList);
-    packet = MIDIPacketListAdd(packetList, sizeof(buffer), packet, timestamp, [data length], [data bytes]);
-    if (packet == NULL) {
-        return !noErr;
+        if (_onMessageReceivedFromVirtualEndpoint) {
+            _onMessageReceivedFromVirtualEndpoint(virtualDestIndex, data, timestamp);
+        }
+
+        return noErr;
+    }
+}
+
+- (OSStatus)sendMessage:(NSData *)data toVirtualSourceIndex:(ItemCount)virtualSrcIndex timestamp:(uint64_t)timestamp
+{
+    if (virtualSrcIndex < [_virtualSrcEndpointInfoArray count]) {
+        if (_onMessageReceived) {
+            ItemCount index = [_srcEndpointInfoArray count] + virtualSrcIndex;
+            _onMessageReceived(index, data, timestamp);
+        }
     }
     
-    OSStatus status = MIDISend(_outputPortRef, endpoint, packetList);
-
-    return status;
+    return noErr;
 }
 
 - (NSDictionary *)portinfoFromEndpointRef:(MIDIEndpointRef)endpoint
@@ -112,22 +176,59 @@
 
 - (NSDictionary *)portinfoFromDestinationEndpointIndex:(ItemCount)index
 {
+    if (index < [_destEndpointInfoArray count]) {
+        // proper Core MIDI endpoints
+        return [self portinfoFromEndpointRef:MIDIGetDestination(index)];
+    
+    } else {
+        ItemCount virtualDestIndex = index - [_destEndpointInfoArray count];
+        VirtualEndpointInfo *info = _virtualDestEndpointInfoArray[virtualDestIndex];
+        
+        // virtual endpoints
+        NSDictionary *portInfo = @{ @"id"           : [NSNumber numberWithInt:(int)index],
+                                    @"version"      : [NSNumber numberWithInt:0],
+                                    @"manufacturer" : @"",
+                                    @"name"         : info.name,
+                                  };
+
+        return portInfo;
+    }
+    
+    
+    
     return [self portinfoFromEndpointRef:MIDIGetDestination(index)];
 }
 
 - (NSDictionary *)portinfoFromSourceEndpointIndex:(ItemCount)index
 {
-    return [self portinfoFromEndpointRef:MIDIGetSource(index)];
+    if (index < [_srcEndpointInfoArray count]) {
+        // proper Core MIDI endpoints
+        return [self portinfoFromEndpointRef:MIDIGetSource(index)];
+
+    } else {
+        ItemCount virtualSrcIndex = index - [_srcEndpointInfoArray count];
+        VirtualEndpointInfo *info = _virtualSrcEndpointInfoArray[virtualSrcIndex];
+        
+        // virtual endpoints
+        NSDictionary *portInfo = @{ @"id"           : [NSNumber numberWithInt:(int)index],
+                                    @"version"      : [NSNumber numberWithInt:0],
+                                    @"manufacturer" : @"",
+                                    @"name"         : info.name,
+                                    };
+        
+        return portInfo;
+
+    }
 }
 
 - (ItemCount)numberOfSources
 {
-    return MIDIGetNumberOfSources();
+    return [_srcEndpointInfoArray count] + [_virtualSrcEndpointInfoArray count];
 }
 
 - (ItemCount)numberOfDestinations
 {
-    return MIDIGetNumberOfDestinations();
+    return [_destEndpointInfoArray count] + [_virtualDestEndpointInfoArray count];
 }
 
 #pragma mark -
@@ -183,7 +284,7 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
                     switch (n.childType) {
                         case kMIDIObjectType_Destination:
                             {
-                                NSUInteger index = [_destinationEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                                NSUInteger index = [_destEndpointInfoArray indexOfUniqueId:uniqueId];
                                 NSAssert(index != NSNotFound, @"Removed unknown MIDI destination");
                                 if (_onDestinationPortRemoved) {
                                     _onDestinationPortRemoved(index);
@@ -193,7 +294,7 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
                             
                         case kMIDIObjectType_Source:
                             {
-                                NSUInteger index = [_sourceEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                                NSUInteger index = [_srcEndpointInfoArray indexOfUniqueId:uniqueId];
                                 NSAssert(index != NSNotFound, @"Removed unknown MIDI source");
                                 if (_onSourcePortRemoved) {
                                     _onSourcePortRemoved(index);
@@ -225,7 +326,7 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
                     switch (n.childType) {
                         case kMIDIObjectType_Destination:
                             {
-                                NSUInteger index = [_destinationEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                                NSUInteger index = [_destEndpointInfoArray indexOfUniqueId:uniqueId];
                                 NSAssert(index != NSNotFound, @"Added unknown MIDI destination");
                                 if (_onDestinationPortAdded) {
                                     _onDestinationPortAdded(index);
@@ -235,7 +336,7 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
                             
                         case kMIDIObjectType_Source:
                             {
-                                NSUInteger index = [_sourceEndpointIDs indexOfObject:[NSNumber numberWithInt:uniqueId]];
+                                NSUInteger index = [_srcEndpointInfoArray indexOfUniqueId:uniqueId];
                                 NSAssert(index != NSNotFound, @"Added unknown MIDI source");
                                 if (_onSourcePortAdded) {
                                     _onSourcePortAdded(index);
@@ -285,7 +386,7 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
     // Get MIDI IN endpoints and connect them to the MIDI port.
     ItemCount sourceCount = MIDIGetNumberOfSources();
     NSMutableArray *parsers = [NSMutableArray arrayWithCapacity:sourceCount];
-    NSMutableArray *sourceEndpointIDs = [NSMutableArray arrayWithCapacity:sourceCount];
+    NSMutableArray *sourceEndpointInfoArray = [NSMutableArray arrayWithCapacity:sourceCount];
 
     for (ItemCount i = 0; i < sourceCount; i++) {
         MIDIParser *parser = [[MIDIParser alloc] init];
@@ -304,11 +405,13 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
             return NO;
         }
         
-        [sourceEndpointIDs addObject:[NSNumber numberWithInt:uniqueId]];
+        CoreMIDIEndpointInfo *info = [[CoreMIDIEndpointInfo alloc] init];
+        info.uniqueId = uniqueId;
+        [sourceEndpointInfoArray addObject:info];
     }
     
     _parsers = parsers;
-    _sourceEndpointIDs = sourceEndpointIDs;
+    _srcEndpointInfoArray = sourceEndpointInfoArray;
 
     return YES;
 }
@@ -324,7 +427,7 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
     }
 
     ItemCount destinationCount = MIDIGetNumberOfDestinations();
-    NSMutableArray *destinationEndpointIDs = [NSMutableArray arrayWithCapacity:destinationCount];
+    NSMutableArray *destinationEndpointInfoArray = [NSMutableArray arrayWithCapacity:destinationCount];
     for (ItemCount i = 0; i < destinationCount; i++) {
         MIDIEndpointRef endpointRef = MIDIGetDestination(i);
 
@@ -334,10 +437,12 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
             return NO;
         }
         
-        [destinationEndpointIDs addObject:[NSNumber numberWithInt:uniqueId]];
+        CoreMIDIEndpointInfo *info = [[CoreMIDIEndpointInfo alloc] init];
+        info.uniqueId = uniqueId;
+        [destinationEndpointInfoArray addObject:info];
     }
 
-    _destinationEndpointIDs = destinationEndpointIDs;
+    _destEndpointInfoArray = destinationEndpointInfoArray;
     
     return YES;
 }
@@ -389,6 +494,49 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
     status = MIDIClientDispose(_clientRef);
     NSAssert(status == noErr, @"MIDIClientDispose");
 }
+
+- (ItemCount)createVirtualSrcEndpointWithName:(NSString *)name
+{
+    if (_virtualSrcEndpointInfoArray == nil) {
+        _virtualSrcEndpointInfoArray = [[NSMutableArray alloc] init];
+    }
+    
+    VirtualEndpointInfo *info = [[VirtualEndpointInfo alloc] init];
+    info.name = name;
+    
+    [_virtualSrcEndpointInfoArray addObject:info];
+
+    return [_virtualSrcEndpointInfoArray count] - 1;
+}
+
+- (void)removeVirtualSrcEndpointWithIndex:(ItemCount)index
+{
+    if (index < [_virtualSrcEndpointInfoArray count]) {
+        [_virtualSrcEndpointInfoArray removeObjectAtIndex:index];
+    }
+}
+
+- (ItemCount)createVirtualDestEndpointWithName:(NSString *)name
+{
+    if (_virtualDestEndpointInfoArray == nil) {
+        _virtualDestEndpointInfoArray = [[NSMutableArray alloc] init];
+    }
+    
+    VirtualEndpointInfo *info = [[VirtualEndpointInfo alloc] init];
+    info.name = name;
+    
+    [_virtualDestEndpointInfoArray addObject:info];
+
+    return [_virtualDestEndpointInfoArray count] - 1;
+}
+
+- (void)removeVirtualDestEndpointWithIndex:(ItemCount)index
+{
+    if (index < [_virtualDestEndpointInfoArray count]) {
+        [_virtualDestEndpointInfoArray removeObjectAtIndex:index];
+    }
+}
+
 
 - (id)init
 {
