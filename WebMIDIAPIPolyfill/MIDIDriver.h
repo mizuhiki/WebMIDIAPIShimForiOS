@@ -21,16 +21,16 @@
 @interface MIDIDriver : NSObject
 
 - (OSStatus)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
-- (OSStatus)sendMessage:(NSData *)data toVirtualSourceIndex:(ItemCount)index timestamp:(uint64_t)timestamp;
+- (OSStatus)sendMessage:(NSData *)data toVirtualSourceIndex:(ItemCount)vindex timestamp:(uint64_t)timestamp;
 - (NSDictionary *)portinfoFromDestinationEndpointIndex:(ItemCount)index;
 - (NSDictionary *)portinfoFromSourceEndpointIndex:(ItemCount)index;
 - (ItemCount)numberOfSources;
 - (ItemCount)numberOfDestinations;
 
 - (ItemCount)createVirtualSrcEndpointWithName:(NSString *)name;
-- (void)removeVirtualSrcEndpointWithIndex:(ItemCount)index;
+- (void)removeVirtualSrcEndpointWithIndex:(ItemCount)vindex;
 - (ItemCount)createVirtualDestEndpointWithName:(NSString *)name;
-- (void)removeVirtualDestEndpointWithIndex:(ItemCount)index;
+- (void)removeVirtualDestEndpointWithIndex:(ItemCount)vindex;
 
 @property (nonatomic, copy) void (^onMessageReceived)(ItemCount index, NSData *data, uint64_t timestamp);
 @property (nonatomic, copy) void (^onMessageReceivedFromVirtualEndpoint)(ItemCount index, NSData *data, uint64_t timestamp);

@@ -124,11 +124,11 @@
     }
 }
 
-- (OSStatus)sendMessage:(NSData *)data toVirtualSourceIndex:(ItemCount)virtualSrcIndex timestamp:(uint64_t)timestamp
+- (OSStatus)sendMessage:(NSData *)data toVirtualSourceIndex:(ItemCount)vindex timestamp:(uint64_t)timestamp
 {
-    if (virtualSrcIndex < [_virtualSrcEndpointInfoArray count]) {
+    if (vindex < [_virtualSrcEndpointInfoArray count]) {
         if (_onMessageReceived) {
-            ItemCount index = [_srcEndpointInfoArray count] + virtualSrcIndex;
+            ItemCount index = [_srcEndpointInfoArray count] + vindex;
             _onMessageReceived(index, data, timestamp);
         }
     }
@@ -506,13 +506,25 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
     
     [_virtualSrcEndpointInfoArray addObject:info];
 
-    return [_virtualSrcEndpointInfoArray count] - 1;
+    ItemCount vindex = [_virtualSrcEndpointInfoArray count] -1;
+    
+    if (_onSourcePortAdded) {
+        ItemCount index = [_srcEndpointInfoArray count] + vindex;
+        _onSourcePortAdded(index);
+    }
+
+    return vindex;
 }
 
-- (void)removeVirtualSrcEndpointWithIndex:(ItemCount)index
+- (void)removeVirtualSrcEndpointWithIndex:(ItemCount)vindex
 {
-    if (index < [_virtualSrcEndpointInfoArray count]) {
-        [_virtualSrcEndpointInfoArray removeObjectAtIndex:index];
+    if (vindex < [_virtualSrcEndpointInfoArray count]) {
+        if (_onSourcePortRemoved) {
+            ItemCount index = [_srcEndpointInfoArray count] + vindex;
+            _onSourcePortRemoved(index);
+        }
+        
+        [_virtualSrcEndpointInfoArray removeObjectAtIndex:vindex];
     }
 }
 
@@ -527,13 +539,25 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
     
     [_virtualDestEndpointInfoArray addObject:info];
 
-    return [_virtualDestEndpointInfoArray count] - 1;
+    ItemCount vindex = [_virtualDestEndpointInfoArray count] - 1;
+    
+    if (_onDestinationPortAdded) {
+        ItemCount index = [_destEndpointInfoArray count] + vindex;
+        _onDestinationPortAdded(index);
+    }
+    
+    return vindex;
 }
 
-- (void)removeVirtualDestEndpointWithIndex:(ItemCount)index
+- (void)removeVirtualDestEndpointWithIndex:(ItemCount)vindex
 {
-    if (index < [_virtualDestEndpointInfoArray count]) {
-        [_virtualDestEndpointInfoArray removeObjectAtIndex:index];
+    if (vindex < [_virtualDestEndpointInfoArray count]) {
+        if (_onDestinationPortRemoved) {
+            ItemCount index = [_destEndpointInfoArray count] + vindex;
+            _onDestinationPortRemoved(index);
+        }
+        
+        [_virtualDestEndpointInfoArray removeObjectAtIndex:vindex];
     }
 }
 
