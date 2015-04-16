@@ -143,8 +143,9 @@
         this._inputs = null;
         this._outputs = null;
         this._timestampOrigin = 0;
+        this._sysexAccessRequested = false;
         this.onstatechange = null;
-        this.sysexEnabled = true;
+        this.sysexEnabled = false;
         this.inputs = null;
         this.outputs = null;
         _this = this;
@@ -167,6 +168,8 @@
 
             _this._outputs = outputs;
             _this.outputs = _createMIDIPortMap(outputs);
+
+            _this.sysexEnabled = _this._sysexAccessRequested;
 
             _onReady.bind(_this)();
 
@@ -262,6 +265,14 @@
             _this._inputs.splice(index, 1);
             _this.inputs = _createMIDIPortMap(_this._inputs);
         };
+
+ 
+        if (typeof options !== "undefined") {
+            if (options['sysex'] == true || options['sysex'] == "true") {
+                this._sysexAccessRequested = true;
+                options['sysex'] = true; // options['sysex'] must be a boolean value
+            }
+        }
 
         var param = { "options": options, "url" : document.location.href };
 
