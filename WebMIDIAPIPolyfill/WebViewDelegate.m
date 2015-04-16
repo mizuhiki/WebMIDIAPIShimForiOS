@@ -80,9 +80,21 @@
         // Setup the callback for receiving MIDI message.
         _midiDriver.onMessageReceived = ^(ItemCount index, NSData *receivedData, uint64_t timestamp) {
             NSMutableArray *array = [NSMutableArray arrayWithCapacity:[receivedData length]];
+            BOOL sysexIncluded = NO;
             for (int i = 0; i < [receivedData length]; i++) {
-                [array addObject:[NSNumber numberWithUnsignedChar:((unsigned char *)[receivedData bytes])[i]]];
+                unsigned char byte = ((unsigned char *)[receivedData bytes])[i];
+                [array addObject:[NSNumber numberWithUnsignedChar:byte]];
+
+                if (byte == 0xf0) {
+                    sysexIncluded = YES;
+                }
             }
+            
+            if (_sysexEnabled == NO && sysexIncluded == YES) {
+                // should throw InvalidAccessError exception here
+                return;
+            }
+
             NSData *dataJSON = [NSJSONSerialization dataWithJSONObject:array options:0 error:nil];
             NSString *dataJSONStr = [[NSString alloc] initWithData:dataJSON encoding:NSUTF8StringEncoding];
 
