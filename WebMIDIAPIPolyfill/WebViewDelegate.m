@@ -47,7 +47,18 @@
 
         _sysexEnabled = NO;
         id sysexOption = MIDIoptions[@"sysex"];
+
+        BOOL isSysExAccessRequested = NO;
+
         if ([sysexOption isKindOfClass:[NSNumber class]] && [sysexOption boolValue] == YES) {
+            isSysExAccessRequested = YES;
+        }
+        
+        if ([sysexOption isKindOfClass:[NSString class]] && [sysexOption isEqualToString:@"true"]) {
+            isSysExAccessRequested = YES;
+        }
+
+        if (isSysExAccessRequested == YES) {
             if (_confirmSysExAvailability) {
                 if (_confirmSysExAvailability(url) == NO) {
                     [self invokeJSCallback_onNotReady:message.webView];
