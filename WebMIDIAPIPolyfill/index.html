@@ -9,21 +9,17 @@
     function setup() {
         var messagelog = document.getElementById('messagelog');
         if (window.navigator.requestMIDIAccess) {
-            window.navigator.requestMIDIAccess( { sysex : true } ).then( success, function() { messagelog.innerHTML += "requestMIDIAccess() failed.\n"; });
+            window.navigator.requestMIDIAccess( { sysex : false } ).then( success, function() { messagelog.innerHTML += "requestMIDIAccess() failed.\n"; });
         } else {
             alert("Web MIDI API is not available.");
             messagelog.innerHTML += "Web MIDI API is not available.\n";
         }
 
         function setupEventHandler() {
-            if (typeof midiAccess.inputs === "function") {
-                inputs = midiAccess.inputs();
-            } else {
-                var iter = midiAccess.inputs.values();
-                inputs = [];
-                for (var o = iter.next(); !o.done; o = iter.next()) {
-                    inputs.push(o.value);
-                }
+            var iter = midiAccess.inputs.values();
+            inputs = [];
+            for (var o = iter.next(); !o.done; o = iter.next()) {
+                inputs.push(o.value);
             }
 
             for (var port = 0; port < inputs.length; port++) {
@@ -43,36 +39,15 @@
                         messagelog.innerHTML += str + "\n";
                         messagelog.scrollTop = messagelog.scrollHeight;
                     };
-                 
-                    inputs[_port].ondisconnect = function (event) {
-                        var str = "input port:" + _port + ", disconnected.";
-                        var messagelog = document.getElementById('messagelog');
-                        messagelog.innerHTML += str + "\n";
-                    };
                 }());
             }
 
-            if (typeof midiAccess.outputs === "function") {
-                outputs = midiAccess.outputs();
-            } else {
-                var iter = midiAccess.outputs.values();
-                outputs = [];
-                for (var o = iter.next(); !o.done; o = iter.next()) {
-                    outputs.push(o.value);
-                }
+            var iter = midiAccess.outputs.values();
+            outputs = [];
+            for (var o = iter.next(); !o.done; o = iter.next()) {
+                outputs.push(o.value);
             }
 
-            for (var port = 0; port < outputs.length; port++) {
-                (function () {
-                    var _port = port;
-                    outputs[_port].ondisconnect = function (event) {
-                        var str = "output port:" + _port + ", disconnected.";
-                        var messagelog = document.getElementById('messagelog');
-                        messagelog.innerHTML += str + "\n";
-                    };
-                }());
-            }
-            
             midiInputs = inputs;
             midiOutputs = outputs;
         }
@@ -80,12 +55,10 @@
         function success(access) {
             midiAccess = access;
 
-            midiAccess.onconnect = function (event) {
-                var str = "port: " + event.port.name + ", connected.";
+            midiAccess.onstatechange = function (event) {
+                var str = "statechange: " + event.port.name + ", " + event.port.connection;
                 var messagelog = document.getElementById('messagelog');
                 messagelog.innerHTML += str + "\n";
-
-                setupEventHandler();
             }
 
             setupEventHandler();
