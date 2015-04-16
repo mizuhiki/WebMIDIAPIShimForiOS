@@ -136,6 +136,18 @@
     return noErr;
 }
 
+- (OSStatus)clearWithDestinationIndex:(ItemCount)index
+{
+    OSStatus status = noErr;
+
+    if (index < [_destEndpointInfoArray count]) {
+        MIDIEndpointRef endpoint = MIDIGetDestination(index);
+        status = MIDIFlushOutput(endpoint);
+    }
+    
+    return status;
+}
+
 - (NSDictionary *)portinfoFromEndpointRef:(MIDIEndpointRef)endpoint
 {
     OSStatus status;

@@ -39,6 +39,7 @@
     [userContentController addUserScript:script];
     [userContentController addScriptMessageHandler:delegate name:@"onready"];
     [userContentController addScriptMessageHandler:delegate name:@"send"];
+    [userContentController addScriptMessageHandler:delegate name:@"clear"];
 
     configuration.userContentController = userContentController;
     

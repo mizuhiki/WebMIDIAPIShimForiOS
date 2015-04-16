@@ -22,6 +22,8 @@
 
 - (OSStatus)sendMessage:(NSData *)data toDestinationIndex:(ItemCount)index deltatime:(float)deltatime_ms;
 - (OSStatus)sendMessage:(NSData *)data toVirtualSourceIndex:(ItemCount)vindex timestamp:(uint64_t)timestamp;
+- (OSStatus)clearWithDestinationIndex:(ItemCount)index;
+
 - (NSDictionary *)portinfoFromDestinationEndpointIndex:(ItemCount)index;
 - (NSDictionary *)portinfoFromSourceEndpointIndex:(ItemCount)index;
 - (ItemCount)numberOfSources;

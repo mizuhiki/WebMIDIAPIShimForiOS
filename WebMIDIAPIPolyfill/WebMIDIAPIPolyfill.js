@@ -448,7 +448,13 @@
     };
 
     MIDIOutput.prototype.clear = function() {
-        // $$$ clear
+        MIDIOutputClearData = function ( outputPortIndex ) {
+            this.outputPortIndex = outputPortIndex;
+        };
+ 
+        var outputClearData = new MIDIOutputClearData(this._index);
+
+        window.webkit.messageHandlers.clear.postMessage(outputClearData);
     };
 
     _requestMIDIAccess = function _requestMIDIAccess( options ) {

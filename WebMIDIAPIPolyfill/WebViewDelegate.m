@@ -187,6 +187,11 @@
         [_midiDriver sendMessage:message toDestinationIndex:outputIndex deltatime:deltatime];
 
         return;
+    } else if ([message.name isEqualToString:@"clear"] == YES) {
+        NSDictionary *dict = message.body;
+        ItemCount outputIndex = [dict[@"outputPortIndex"] unsignedLongValue];
+        
+        [_midiDriver clearWithDestinationIndex:outputIndex];
     }
 }
 
