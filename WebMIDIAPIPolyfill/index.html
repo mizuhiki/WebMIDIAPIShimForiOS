@@ -56,7 +56,7 @@
             midiAccess = access;
 
             midiAccess.onstatechange = function (event) {
-                var str = "statechange: " + event.port.name + ", " + event.port.connection;
+                var str = "statechange: " + event.port.name + ", " + event.port.connection + ", " + event.port.type;
                 var messagelog = document.getElementById('messagelog');
                 messagelog.innerHTML += str + "\n";
             }

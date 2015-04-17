@@ -166,11 +166,11 @@
         NSDictionary *dict = message.body;
         
         NSArray *array = dict[@"data"];
-        NSMutableData *message = [NSMutableData dataWithCapacity:[array count]];
+        NSMutableData *data = [NSMutableData dataWithCapacity:[array count]];
         BOOL sysexIncluded = NO;
         for (NSNumber *number in array) {
             uint8_t byte = [number unsignedIntegerValue];
-            [message appendBytes:&byte length:1];
+            [data appendBytes:&byte length:1];
 
             if (byte == 0xf0) {
                 sysexIncluded = YES;
@@ -178,13 +178,12 @@
         }
 
         if (_sysexEnabled == NO && sysexIncluded == YES) {
-            // should throw InvalidAccessError exception here
             return;
         }
         
         ItemCount outputIndex = [dict[@"outputPortIndex"] unsignedLongValue];
         float deltatime = [dict[@"deltaTime"] floatValue];
-        [_midiDriver sendMessage:message toDestinationIndex:outputIndex deltatime:deltatime];
+        [_midiDriver sendMessage:data toDestinationIndex:outputIndex deltatime:deltatime];
 
         return;
     } else if ([message.name isEqualToString:@"clear"] == YES) {
