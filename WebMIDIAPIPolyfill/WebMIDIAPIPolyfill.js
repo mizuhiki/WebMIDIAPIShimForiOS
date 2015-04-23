@@ -227,15 +227,6 @@
             output._setState(MIDIPortDeviceState.disconnected);
             output._setConnection(MIDIPortConnectionState.pending);
 
-            var evt = document.createEvent( "Event" );
-            evt.initEvent( "statechange", false, false );
-            evt.port = output;
-            _this.dispatchEvent(evt);
-
-            if (output != null) {
-                output.dispatchEvent(evt);
-            }
-
             _this._outputs.splice(index, 1);
             _this.outputs = _createMIDIPortMap(_this._outputs);
         };
@@ -245,15 +236,6 @@
 
             input._setState(MIDIPortDeviceState.disconnected);
             input._setConnection(MIDIPortConnectionState.pending);
-
-            var evt = document.createEvent( "Event" );
-            evt.initEvent( "statechange", false, false );
-            evt.port = input;
-            _this.dispatchEvent(evt);
-
-            if (input != null) {
-                input.dispatchEvent(evt);
-            }
 
             _this._inputs.splice(index, 1);
             _this.inputs = _createMIDIPortMap(_this._inputs);
@@ -374,6 +356,10 @@
             evt.initEvent( "statechange", false, false );
             evt.port = this;
             this.dispatchEvent(evt);
+
+            if (this._midiaccess != null) {
+                this._midiaccess.dispatchEvent(evt);
+            }
         }
     };
 
