@@ -69,9 +69,21 @@
         // Setup the callback for receiving MIDI message.
         _midiDriver.onMessageReceived = ^(ItemCount index, NSData *receivedData, uint64_t timestamp) {
             NSMutableArray *array = [NSMutableArray arrayWithCapacity:[receivedData length]];
+            BOOL sysexIncluded = NO;
             for (int i = 0; i < [receivedData length]; i++) {
-                [array addObject:[NSNumber numberWithUnsignedChar:((unsigned char *)[receivedData bytes])[i]]];
+                unsigned char byte = ((unsigned char *)[receivedData bytes])[i];
+                [array addObject:[NSNumber numberWithUnsignedChar:byte]];
+
+                if (byte == 0xf0) {
+                    sysexIncluded = YES;
+                }
             }
+            
+            if (_sysexEnabled == NO && sysexIncluded == YES) {
+                // should throw InvalidAccessError exception here
+                return;
+            }
+
             NSData *dataJSON = [NSJSONSerialization dataWithJSONObject:array options:0 error:nil];
             NSString *dataJSONStr = [[NSString alloc] initWithData:dataJSON encoding:NSUTF8StringEncoding];
 
@@ -154,11 +166,11 @@
         NSDictionary *dict = message.body;
         
         NSArray *array = dict[@"data"];
-        NSMutableData *message = [NSMutableData dataWithCapacity:[array count]];
+        NSMutableData *data = [NSMutableData dataWithCapacity:[array count]];
         BOOL sysexIncluded = NO;
         for (NSNumber *number in array) {
             uint8_t byte = [number unsignedIntegerValue];
-            [message appendBytes:&byte length:1];
+            [data appendBytes:&byte length:1];
 
             if (byte == 0xf0) {
                 sysexIncluded = YES;
@@ -166,15 +178,19 @@
         }
 
         if (_sysexEnabled == NO && sysexIncluded == YES) {
-            // should throw InvalidAccessError exception here
             return;
         }
         
         ItemCount outputIndex = [dict[@"outputPortIndex"] unsignedLongValue];
         float deltatime = [dict[@"deltaTime"] floatValue];
-        [_midiDriver sendMessage:message toDestinationIndex:outputIndex deltatime:deltatime];
+        [_midiDriver sendMessage:data toDestinationIndex:outputIndex deltatime:deltatime];
 
         return;
+    } else if ([message.name isEqualToString:@"clear"] == YES) {
+        NSDictionary *dict = message.body;
+        ItemCount outputIndex = [dict[@"outputPortIndex"] unsignedLongValue];
+        
+        [_midiDriver clearWithDestinationIndex:outputIndex];
     }
 }
 

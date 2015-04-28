@@ -2,19 +2,19 @@
 
  Copyright 2013 Chris Wilson
  Copyright 2014-2015 Takashi Mizuhiki
- 
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
- 
+
  http://www.apache.org/licenses/LICENSE-2.0
- 
+
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
- 
+
  */
 
 // This work was derived from WebMIDIAPIShim by Chris Wilson.
@@ -26,7 +26,7 @@
         this._index = 0;
         this._maxIndex = items.length;
     }
- 
+
     Iterator.prototype.next = function(){
         if (this._index === this._maxIndex) {
             return {value: undefined, done: true};
@@ -34,11 +34,11 @@
 
         return {value: this._items[this._index++], done: false};
     };
- 
+
     Iterator.prototype.reset = function(){
         this._index = 0;
     };
- 
+
 
     function Promise() {
     }
@@ -58,6 +58,16 @@
             this.reject(error);
     };
 
+    var MIDIPortDeviceState = {
+        disconnected : "disconnected",
+        connected    : "connected"
+    };
+
+    var MIDIPortConnectionState = {
+        open    : "open",
+        closed  : "closed",
+        pending : "pending"
+    };
 
     MIDIEventDispatcher = function MIDIEventDispatcher() {
         this._listeners = {};
@@ -77,7 +87,7 @@
 
         this._listeners[type].push( listener );
     };
- 
+
     MIDIEventDispatcher.prototype.removeEventListener = function (type, listener, useCapture) {
         var listeners = this._listeners[type];
         if (listeners != null) {
@@ -89,11 +99,11 @@
             }
         }
     };
- 
+
     MIDIEventDispatcher.prototype.preventDefault = function() {
         this._pvtDef = true;
     };
- 
+
     MIDIEventDispatcher.prototype.dispatchEvent = function (evt) {
         this._pvtDef = false;
 
@@ -116,15 +126,9 @@
                 }
                 break;
 
-            case "connect":
-                if (this.onconnect) {
-                    this.onconnect( evt );
-                }
-                break;
-
-            case "disconnect":
-                if (this.ondisconnect) {
-                    this.ondisconnect( evt );
+            case "statechange":
+                if (this.onstatechange) {
+                    this.onstatechange( evt );
                 }
                 break;
         }
@@ -139,39 +143,41 @@
         this._inputs = null;
         this._outputs = null;
         this._timestampOrigin = 0;
-        this.onconnect = null;
-        this.ondisconnect = null;
-        this.sysexEnabled = true;
+        this._sysexAccessRequested = false;
+        this.onstatechange = null;
+        this.sysexEnabled = false;
         this.inputs = null;
         this.outputs = null;
-        _this = this;
+        var _this = this;
 
         _callback_onReady = function(sources, destinations) {
             _this._timestampOrigin = window.performance.now();
- 
+
             var inputs = new Array(sources.length);
             for (var i = 0; i < sources.length; i++ ) {
-                inputs[i] = new MIDIInput( sources[i].id, sources[i].name, sources[i].manufacturer, i );
+                inputs[i] = new MIDIInput( sources[i].id, sources[i].name, sources[i].manufacturer, i, _this );
             }
- 
+
             _this._inputs = inputs;
             _this.inputs = _createMIDIPortMap(inputs);
- 
+
             var outputs = new Array(destinations.length);
             for (var i = 0; i < destinations.length; i++ ) {
-                outputs[i] = new MIDIOutput( destinations[i].id, destinations[i].name, destinations[i].manufacturer, i );
+                outputs[i] = new MIDIOutput( destinations[i].id, destinations[i].name, destinations[i].manufacturer, i, _this );
             }
 
             _this._outputs = outputs;
             _this.outputs = _createMIDIPortMap(outputs);
- 
+
+            _this.sysexEnabled = _this._sysexAccessRequested;
+
             _onReady.bind(_this)();
         };
 
         _callback_onNotReady = function() {
             _onNotReady.bind(_this)();
         };
- 
+
         _callback_receiveMIDIMessage = function(index, receivedTime, data) {
             var evt = document.createEvent( "Event" );
 
@@ -187,68 +193,63 @@
 
         _callback_addDestination = function(index, portInfo) {
             var evt = document.createEvent( "Event" );
-            var output = new MIDIOutput(portInfo.id, portInfo.name, portInfo.manufacturer, index);
- 
+            var output = new MIDIOutput(portInfo.id, portInfo.name, portInfo.manufacturer, index, _this);
+
             _this._outputs.splice(index, 0, output);
             _this.outputs = _createMIDIPortMap(_this._outputs);
 
-            evt.initEvent( "connect", false, false );
+            output._setState(MIDIPortDeviceState.connected);
+            output._setConnection(MIDIPortConnectionState.closed);
+
+            evt.initEvent( "statechange", false, false );
             evt.port = output;
             _this.dispatchEvent(evt);
         };
 
         _callback_addSource = function(index, portInfo) {
             var evt = document.createEvent( "Event" );
-            var input = new MIDIInput(portInfo.id, portInfo.name, portInfo.manufacturer, index);
- 
+            var input = new MIDIInput(portInfo.id, portInfo.name, portInfo.manufacturer, index, _this);
+
             _this._inputs.splice(index, 0, input);
             _this.inputs = _createMIDIPortMap(_this._inputs);
 
-            evt.initEvent( "connect", false, false );
+            input._setState(MIDIPortDeviceState.connected);
+            input._setConnection(MIDIPortConnectionState.closed);
+
+            evt.initEvent( "statechange", false, false );
             evt.port = input;
             _this.dispatchEvent(evt);
         };
- 
+
         _callback_removeDestination = function(index) {
-            var evt = document.createEvent( "Event" );
-
-            evt.initEvent( "disconnect", false, false );
-
             var output = _this._outputs[index];
-            if (output != null) {
-                output.dispatchEvent(evt);
-            }
 
-            evt = document.createEvent( "Event" );
-            evt.initEvent( "disconnect", false, false );
-            evt.port = output;
-            _this.dispatchEvent(evt);
- 
+            output._setState(MIDIPortDeviceState.disconnected);
+            output._setConnection(MIDIPortConnectionState.pending);
+
             _this._outputs.splice(index, 1);
             _this.outputs = _createMIDIPortMap(_this._outputs);
         };
 
         _callback_removeSource = function(index) {
-            var evt = document.createEvent( "Event" );
- 
-            evt.initEvent( "disconnect", false, false );
-
             var input = _this._inputs[index];
-            if (input != null) {
-                input.dispatchEvent(evt);
-            }
 
-            evt = document.createEvent( "Event" );
-            evt.initEvent( "disconnect", false, false );
-            evt.port = input;
-            _this.dispatchEvent(evt);
+            input._setState(MIDIPortDeviceState.disconnected);
+            input._setConnection(MIDIPortConnectionState.pending);
 
             _this._inputs.splice(index, 1);
             _this.inputs = _createMIDIPortMap(_this._inputs);
         };
  
+        if (typeof options !== "undefined") {
+            if (options['sysex'] == true || options['sysex'] == "true") {
+                this._sysexAccessRequested = true;
+                options['sysex'] = true; // options['sysex'] must be a boolean value
+            }
+        }
+
         var param = { "options": options, "url" : document.location.href };
- 
+
         window.webkit.messageHandlers.onready.postMessage(param);
     };
 
@@ -269,7 +270,7 @@
             entries = [],
             portsById = {},
             port, i;
- 
+
         for(i = 0; i < size; i++) {
             port = list[i];
 
@@ -278,11 +279,11 @@
             keys.push(port.id);
             portsById[port.id] = port;
         }
- 
+
         keys = new Iterator(keys);
         values = new Iterator(values);
         entries = new Iterator(entries);
- 
+
         return {
             size: size,
             forEach: function(cb) {
@@ -322,42 +323,134 @@
         this.name = "";
         this.type = "";
         this.version = "";
-        this.ondisconnect = null;
+        this.state = MIDIPortDeviceState.connected;
+        this.connection = MIDIPortConnectionState.closed;
+
+        this._promise = new Promise;
+
+        this._midiaccess = null;
     };
 
     MIDIPort.prototype = new MIDIEventDispatcher();
 
+    MIDIPort.prototype._setConnection = function(newState) {
+        if (this.connection != newState) {
+            this.connection = newState;
 
-    MIDIInput = function MIDIInput( id, name, manufacturer, index ) {
+            var evt = document.createEvent( "Event" );
+            evt.initEvent( "statechange", false, false );
+            evt.port = this;
+            this.dispatchEvent(evt);
+
+            if (this._midiaccess != null) {
+                this._midiaccess.dispatchEvent(evt);
+            }
+        }
+    };
+
+    MIDIPort.prototype._setState = function(newState) {
+        if (this.state != newState) {
+            this.state = newState;
+
+            var evt = document.createEvent( "Event" );
+            evt.initEvent( "statechange", false, false );
+            evt.port = this;
+            this.dispatchEvent(evt);
+
+            if (this._midiaccess != null) {
+                this._midiaccess.dispatchEvent(evt);
+            }
+        }
+    };
+
+    MIDIPort.prototype.open = function() {
+        this._setConnection(MIDIPortConnectionState.open);
+
+        setTimeout(function() {
+            this._promise.succeed(this);
+        }.bind(this), 0);
+
+        return this._promise;
+    };
+
+    MIDIPort.prototype.close = function() {
+        this._setConnection(MIDIPortConnectionState.closed);
+
+        setTimeout(function() {
+            this._promise.succeed(this);
+        }.bind(this), 0);
+
+        return this._promise;
+    };
+
+
+    MIDIInput = function MIDIInput( id, name, manufacturer, index, midiaccess ) {
         this._index = index;
         this.id = id;
         this.manufacturer = manufacturer;
         this.name = name;
         this.type = "input";
         this.version = "";
-        this.onmidimessage = null;
+        this._onmidimessage = null;
+        this._midiaccess = midiaccess;
+
+        var _this = this;
+        window.addEventListener('unload', function(e) { _this._midiaccess = null; }, false);
     };
 
     MIDIInput.prototype = new MIDIPort();
- 
- 
-    MIDIOutput = function MIDIOutput( id, name, manufacturer, index ) {
+
+    Object.defineProperty(MIDIInput.prototype, "onmidimessage", {
+                                set: function (value) {
+                                    this._onmidimessage = value;
+                                    if (this.connection == MIDIPortConnectionState.closed) {
+                                        this._setConnection(MIDIPortConnectionState.open);
+                                    }
+                                },
+                                get : function () {
+                                    return this._onmidimessage;
+                                }
+                          });
+
+    MIDIOutput = function MIDIOutput( id, name, manufacturer, index, midiaccess ) {
         this._index = index;
         this.id = id;
         this.manufacturer = manufacturer;
         this.name = name;
         this.type = "output";
         this.version = "";
-    };
+        this._midiaccess = midiaccess;
  
+        var _this = this;
+        window.addEventListener('unload', function(e) { _this._midiaccess = null; }, false);
+    };
+
     MIDIOutput.prototype = new MIDIPort();
 
     MIDIOutput.prototype.send = function( data, timestamp ) {
         var delayBeforeSend = 0;
         if (data.length === 0) {
+            throw new TypeError();
             return false;
         }
-
+ 
+        if (this._midiaccess.sysexEnabled == false) {
+            var i = data.length;
+            do {
+                if (data[i] == 0xf0) {
+                    throwException(DOMException.INVALID_ACCESS_ERR, "InvalidAccessError");
+                }
+            } while (i--);
+        }
+ 
+        if (this.state == MIDIPortDeviceState.disconnected) {
+            throwException(DOMException.INVALID_STATE_ERR, "InvalidStateError");
+        }
+ 
+        if (this.connection == MIDIPortConnectionState.closed) {
+            this._setConnection(MIDIPortConnectionState.open);
+        }
+ 
         if (timestamp) {
             delayBeforeSend = timestamp - window.performance.now();
         }
@@ -372,7 +465,31 @@
 
         window.webkit.messageHandlers.send.postMessage(outputData);
 
+
         return true;
+    };
+ 
+    function throwException(code, name) {
+        function DOMException(code, name) {
+            this.code = code;
+            this.name = name;
+            this.message = name;
+            this.toString = function() {
+                return name;
+            };
+        }
+ 
+        throw new DOMException(code, name);
+    }
+
+    MIDIOutput.prototype.clear = function() {
+        MIDIOutputClearData = function ( outputPortIndex ) {
+            this.outputPortIndex = outputPortIndex;
+        };
+ 
+        var outputClearData = new MIDIOutputClearData(this._index);
+
+        window.webkit.messageHandlers.clear.postMessage(outputClearData);
     };
 
     _requestMIDIAccess = function _requestMIDIAccess( options ) {
@@ -401,7 +518,7 @@
                     };
                 }(Date.now()))
             };
-  
+
         //seach for vendor prefixed version
         for (; i >= 0; i--) {
             if ((prefix[i] + "Now") in exports.performance) {
@@ -413,7 +530,7 @@
                 return props;
             }
         }
-  
+
         //otherwise, try to use connectionStart
         if ("timing" in exports.performance && "connectStart" in exports.performance.timing) {
             //this pretty much approximates performance.now() to the millisecond
@@ -425,7 +542,7 @@
         }
         return props;
     }
-  
+
     //if already defined, bail
     if (("performance" in exports) && ("now" in exports.performance))
         return;
@@ -435,7 +552,7 @@
                 return perf;
             }});
         //otherwise, performance is there, but not "now()"
-  
+
     props = findAlt();
     Object.defineProperty(exports.performance, "now", props);
 }(window));

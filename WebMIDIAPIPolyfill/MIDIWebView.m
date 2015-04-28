@@ -18,16 +18,15 @@
 
 #import "MIDIWebView.h"
 #import "WebViewDelegate.h"
-#import "MIDIDriver.h"
 
 @implementation MIDIWebView
 
-+ (WKWebViewConfiguration *)createConfigurationWithSysExConfirmation:(BOOL (^)(NSString *url))confirmSysExAvailability
++ (WKWebViewConfiguration *)createConfigurationWithMIDIDriver:(MIDIDriver *)midiDriver sysexConfirmation:(BOOL (^)(NSString *url))confirmSysExAvailability
 {
     WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
 
     WebViewDelegate *delegate = [[WebViewDelegate alloc] init];
-    delegate.midiDriver = [[MIDIDriver alloc] init];
+    delegate.midiDriver = midiDriver;
     delegate.confirmSysExAvailability = confirmSysExAvailability;
     
     // Create a delegate for handling informal URL schemes.
@@ -40,6 +39,7 @@
     [userContentController addUserScript:script];
     [userContentController addScriptMessageHandler:delegate name:@"onready"];
     [userContentController addScriptMessageHandler:delegate name:@"send"];
+    [userContentController addScriptMessageHandler:delegate name:@"clear"];
 
     configuration.userContentController = userContentController;
     

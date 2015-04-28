@@ -18,8 +18,10 @@
 
 #import <WebKit/WebKit.h>
 
+@class MIDIDriver;
+
 @interface MIDIWebView : WKWebView
 
-+ (WKWebViewConfiguration *)createConfigurationWithSysExConfirmation:(BOOL (^)(NSString *url))confirmSysExAvailability;
++ (WKWebViewConfiguration *)createConfigurationWithMIDIDriver:(MIDIDriver *)midiDriver sysexConfirmation:(BOOL (^)(NSString *url))confirmSysExAvailability;
 
 @end

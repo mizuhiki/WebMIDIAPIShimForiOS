@@ -1,0 +1,18 @@
+<html>
+<head>
+<script type="text/javascript">
+    var succeeded = false;
+    window.onload = function() {
+        window.navigator.requestMIDIAccess( { sysex : true } ).then( function() {
+                                                                            /* succeeded */
+                                                                            succeeded = true;
+                                                                         },
+                                                                         function() {
+                                                                            /* failed */
+                                                                         });
+    };
+</script>
+</head>
+<body>
+</body>
+</html>

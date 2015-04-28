@@ -18,6 +18,11 @@
 
 #import "ViewController.h"
 #import "WebViewDelegate.h"
+#import "MIDIDriver.h"
+
+@interface ViewController ()
+@property (nonatomic, strong) MIDIDriver *midiDriver;
+@end
 
 @implementation ViewController
 
@@ -45,7 +50,8 @@
 {
     [super viewDidLoad];
 
-    WKWebViewConfiguration *configuration = [MIDIWebView createConfigurationWithSysExConfirmation:^(NSString *url) { return YES; }];
+    _midiDriver = [[MIDIDriver alloc] init];
+    WKWebViewConfiguration *configuration = [MIDIWebView createConfigurationWithMIDIDriver:_midiDriver sysexConfirmation:^(NSString *url) { return YES; }];
 
     MIDIWebView *webView = [[MIDIWebView alloc] initWithFrame:self.view.bounds configuration:configuration];
     [self.view addSubview:webView];

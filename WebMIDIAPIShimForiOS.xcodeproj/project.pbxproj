@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C127159A1ADFF69B00DCD37B /* test1.html in Resources */ = {isa = PBXBuildFile; fileRef = C12715991ADFF69B00DCD37B /* test1.html */; };
 		C191EE3A1917B6DC0014167A /* MIDIDriver.m in Sources */ = {isa = PBXBuildFile; fileRef = C191EE391917B6DB0014167A /* MIDIDriver.m */; };
 		C191EE3D1917B85E0014167A /* MIDIParser.m in Sources */ = {isa = PBXBuildFile; fileRef = C191EE3C1917B85E0014167A /* MIDIParser.m */; };
 		C19656E2190E771C0085E3FE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19656E1190E771C0085E3FE /* Foundation.framework */; };
@@ -23,11 +24,12 @@
 		C1965705190E771C0085E3FE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19656E1190E771C0085E3FE /* Foundation.framework */; };
 		C1965706190E771C0085E3FE /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C19656E5190E771C0085E3FE /* UIKit.framework */; };
 		C196570E190E771C0085E3FE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C196570C190E771C0085E3FE /* InfoPlist.strings */; };
-		C1965710190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C196570F190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m */; };
+		C1965710190E771C0085E3FE /* MIDIWebViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C196570F190E771C0085E3FE /* MIDIWebViewTests.m */; };
 		C196571A190E78090085E3FE /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = C1965719190E78090085E3FE /* index.html */; };
 		C196571E190E82F80085E3FE /* WebMIDIAPIPolyfill.js in Resources */ = {isa = PBXBuildFile; fileRef = C196571D190E82F80085E3FE /* WebMIDIAPIPolyfill.js */; };
 		C1965721190FB74D0085E3FE /* WebViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C1965720190FB74D0085E3FE /* WebViewDelegate.m */; };
 		C1A6EB1819E2053F00748234 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1A6EB1719E2053F00748234 /* WebKit.framework */; };
+		C1E0A21A1AE0A038009A3DF6 /* MIDIDriverTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C1E0A2191AE0A038009A3DF6 /* MIDIDriverTest.m */; };
 		C1EDD81F1A98C64F006CFEC1 /* MIDIWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = C1EDD81E1A98C64F006CFEC1 /* MIDIWebView.m */; };
 /* End PBXBuildFile section */
 
@@ -42,6 +44,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C12715991ADFF69B00DCD37B /* test1.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = test1.html; sourceTree = "<group>"; };
 		C191EE381917B6DB0014167A /* MIDIDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MIDIDriver.h; sourceTree = "<group>"; };
 		C191EE391917B6DB0014167A /* MIDIDriver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MIDIDriver.m; sourceTree = "<group>"; };
 		C191EE3B1917B85E0014167A /* MIDIParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MIDIParser.h; sourceTree = "<group>"; };
@@ -65,12 +68,14 @@
 		C1965703190E771C0085E3FE /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		C196570B190E771C0085E3FE /* WebMIDIAPIShimForiOSTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WebMIDIAPIShimForiOSTests-Info.plist"; sourceTree = "<group>"; };
 		C196570D190E771C0085E3FE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		C196570F190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WebMIDIAPIPolyfillTests.m; sourceTree = "<group>"; };
+		C196570F190E771C0085E3FE /* MIDIWebViewTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MIDIWebViewTests.m; sourceTree = "<group>"; };
 		C1965719190E78090085E3FE /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		C196571D190E82F80085E3FE /* WebMIDIAPIPolyfill.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = WebMIDIAPIPolyfill.js; sourceTree = "<group>"; };
 		C196571F190FB74D0085E3FE /* WebViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewDelegate.h; sourceTree = "<group>"; };
 		C1965720190FB74D0085E3FE /* WebViewDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebViewDelegate.m; sourceTree = "<group>"; };
 		C1A6EB1719E2053F00748234 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		C1E0A2191AE0A038009A3DF6 /* MIDIDriverTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MIDIDriverTest.m; sourceTree = "<group>"; };
+		C1E0A21B1AE0A04E009A3DF6 /* MIDIDriverTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MIDIDriverTest.h; sourceTree = "<group>"; };
 		C1EDD81D1A98C64F006CFEC1 /* MIDIWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MIDIWebView.h; sourceTree = "<group>"; };
 		C1EDD81E1A98C64F006CFEC1 /* MIDIWebView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MIDIWebView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -170,7 +175,10 @@
 		C1965709190E771C0085E3FE /* WebMIDIAPIPolyfillTests */ = {
 			isa = PBXGroup;
 			children = (
-				C196570F190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m */,
+				C12715991ADFF69B00DCD37B /* test1.html */,
+				C196570F190E771C0085E3FE /* MIDIWebViewTests.m */,
+				C1E0A21B1AE0A04E009A3DF6 /* MIDIDriverTest.h */,
+				C1E0A2191AE0A038009A3DF6 /* MIDIDriverTest.m */,
 				C196570A190E771C0085E3FE /* Supporting Files */,
 			);
 			path = WebMIDIAPIPolyfillTests;
@@ -274,6 +282,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C127159A1ADFF69B00DCD37B /* test1.html in Resources */,
 				C196570E190E771C0085E3FE /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -299,7 +308,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C1965710190E771C0085E3FE /* WebMIDIAPIPolyfillTests.m in Sources */,
+				C1E0A21A1AE0A038009A3DF6 /* MIDIDriverTest.m in Sources */,
+				C1965710190E771C0085E3FE /* MIDIWebViewTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,14 +462,14 @@
 		C1965717190E771C0085E3FE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/WebMIDIAPIPolyfill.app/WebMIDIAPIPolyfill";
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/WebMIDIAPIShimForiOS.app/WebMIDIAPIShimForiOS";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "WebMIDIAPIPolyfill/WebMIDIAPIPolyfill-Prefix.pch";
+				GCC_PREFIX_HEADER = "WebMIDIAPIPolyfill/WebMIDIAPIShimForiOS-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -474,14 +484,14 @@
 		C1965718190E771C0085E3FE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/WebMIDIAPIPolyfill.app/WebMIDIAPIPolyfill";
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/WebMIDIAPIShimForiOS.app/WebMIDIAPIShimForiOS";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "WebMIDIAPIPolyfill/WebMIDIAPIPolyfill-Prefix.pch";
+				GCC_PREFIX_HEADER = "WebMIDIAPIPolyfill/WebMIDIAPIShimForiOS-Prefix.pch";
 				INFOPLIST_FILE = "WebMIDIAPIPolyfillTests/WebMIDIAPIShimForiOSTests-Info.plist";
 				PRODUCT_NAME = WebMIDIAPIShimForiOSTests;
 				TEST_HOST = "$(BUNDLE_LOADER)";
