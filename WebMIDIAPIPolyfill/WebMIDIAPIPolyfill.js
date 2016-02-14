@@ -287,10 +287,9 @@
         return {
             size: size,
             forEach: function(cb) {
-                var i, entry;
-                for (i = 0; i < size; i++) {
-                    entry = entries[i];
-                    cb(entry[0], entry[1]);
+                entries.reset();
+                for (var entry = entries.next(); !entry.done; entry = entries.next()) {
+                    cb(entry.value[1]);
                 }
             },
             keys: function() {
