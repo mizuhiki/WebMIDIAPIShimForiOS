@@ -20,7 +20,7 @@
 #import "MIDIWebView.h"
 #import "MIDIDriverTest.h"
 
-const static NSTimeInterval kEvaluateTimeout_sec = 0.5f;
+const static NSTimeInterval kEvaluateTimeout_sec = 1.5f;
 
 @interface MIDIWebViewTests : XCTestCase
 @end
@@ -53,8 +53,8 @@ const static NSTimeInterval kEvaluateTimeout_sec = 0.5f;
                       @"<html><head><script type=\"text/javascript\">"
                       @"window.onload = function() {"
                       @"  window.navigator.requestMIDIAccess( %@ ).then("
-                      @"    function() { succeeded = true; },"
-                      @"    function() { succeeded = false; }"
+                      @"    function() { succeeded = 'true'; },"
+                      @"    function() { succeeded = 'false'; }"
                       @"  );"
                       @"};"
                       @"</script></head></html>", parameter];
@@ -65,7 +65,7 @@ const static NSTimeInterval kEvaluateTimeout_sec = 0.5f;
     
     __block bool succeeded = NO;
     [webView evaluateJavaScript:@"succeeded" completionHandler:^(id result, NSError *error) {
-        succeeded = [result boolValue];
+        succeeded = [result isEqualToString:@"true"];
     }];
     
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:kEvaluateTimeout_sec]];
@@ -81,7 +81,7 @@ const static NSTimeInterval kEvaluateTimeout_sec = 0.5f;
     XCTAssertTrue ([self _testWMArequestMIDIAccessWithParameter:@"" sysExAllowed:YES]);
     XCTAssertFalse([self _testWMArequestMIDIAccessWithParameter:@"{ sysex : true }" sysExAllowed:NO]);
     XCTAssertTrue ([self _testWMArequestMIDIAccessWithParameter:@"{ sysex : true }" sysExAllowed:YES]);
-    XCTAssertTrue ([self _testWMArequestMIDIAccessWithParameter:@"{ sysex : false }" sysExAllowed:NO]);
+    XCTAssertTrue ([self _testWMArequestMIDIAccessWithParameter:@"{ sysex : \"false\" }" sysExAllowed:NO]);
     XCTAssertTrue ([self _testWMArequestMIDIAccessWithParameter:@"{ sysex : false }" sysExAllowed:YES]);
     XCTAssertFalse([self _testWMArequestMIDIAccessWithParameter:@"{ sysex : \"true\" }" sysExAllowed:NO]);
     XCTAssertTrue ([self _testWMArequestMIDIAccessWithParameter:@"{ sysex : \"true\" }" sysExAllowed:YES]);
@@ -117,11 +117,11 @@ const static NSTimeInterval kEvaluateTimeout_sec = 0.5f;
                       @"          inputs.push(o.value);"
                       @"        }"
                       @"        if (outputs.length == 1 && inputs.length == 2) {"
-                      @"          succeeded = true;"
+                      @"          succeeded = 'true';"
                       @"        }"
                       @"      }"
                       @"    },"
-                      @"    function() { succeeded = false; }"
+                      @"    function() { succeeded = 'false'; }"
                       @"  );"
                       @"};"
                       @"</script></head></html>";
@@ -132,7 +132,7 @@ const static NSTimeInterval kEvaluateTimeout_sec = 0.5f;
     
     __block bool succeeded = NO;
     [webView evaluateJavaScript:@"succeeded" completionHandler:^(id result, NSError *error) {
-        succeeded = [result boolValue];
+        succeeded = [result isEqualToString:@"true"];
     }];
     
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:kEvaluateTimeout_sec]];
