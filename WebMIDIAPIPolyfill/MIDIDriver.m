@@ -338,6 +338,10 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
                     switch (n.childType) {
                         case kMIDIObjectType_Destination:
                             {
+                                if ([_destEndpointInfoArray count] == 0) {
+                                    break;
+                                }
+                                
                                 NSUInteger index = [_destEndpointInfoArray indexOfUniqueId:uniqueId];
                                 NSAssert(index != NSNotFound, @"Added unknown MIDI destination");
                                 if (_onDestinationPortAdded) {
@@ -348,6 +352,10 @@ static void MyMIDINotifyProc(const MIDINotification *notification, void *refCon)
                             
                         case kMIDIObjectType_Source:
                             {
+                                if ([_srcEndpointInfoArray count] == 0) {
+                                    break;
+                                }
+                                
                                 NSUInteger index = [_srcEndpointInfoArray indexOfUniqueId:uniqueId];
                                 NSAssert(index != NSNotFound, @"Added unknown MIDI source");
                                 if (_onSourcePortAdded) {
