@@ -475,6 +475,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "WebMIDIAPIPolyfillTests/WebMIDIAPIShimForiOSTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = WebMIDIAPIShimForiOSTests;
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
@@ -493,6 +494,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "WebMIDIAPIPolyfill/WebMIDIAPIShimForiOS-Prefix.pch";
 				INFOPLIST_FILE = "WebMIDIAPIPolyfillTests/WebMIDIAPIShimForiOSTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = WebMIDIAPIShimForiOSTests;
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
