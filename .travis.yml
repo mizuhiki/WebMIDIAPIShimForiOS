@@ -1,0 +1,4 @@
+language: objective-c
+xcode_project: WebMIDIAPIShimForiOS.xcodeproj
+xcode_scheme: WebMIDIAPIShimForiOS
+
