@@ -2,3 +2,6 @@ language: objective-c
 xcode_project: WebMIDIAPIShimForiOS.xcodeproj
 xcode_scheme: WebMIDIAPIShimForiOS
 
+script:
+  - xcodebuild clean build -sdk iphonesimulator -project WebMIDIAPIShimForiOS.xcodeproj -scheme WebMIDIAPIShimForiOS CODE_SIGNING_REQUIRED=NO
+
